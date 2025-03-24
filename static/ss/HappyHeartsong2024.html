@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Content</title>
+    <link rel="stylesheet" href="/ss/css/hh2024/content.css">
+    <style>
+        @keyframes pulse {
+            0% {
+                opacity: 0.5;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0.5;
+            }
+        }
+
+        #loader {
+            animation: pulse 1s infinite;
+            color: #000;
+            font-size: 1.5em;
+            font-weight: bold;
+            left: 50%;
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+    </style>
+</head>
+
+<body>
+    <span id="loader">Loading...</span>
+    <script src="/ss/js/hh2024/content.js"></script>
+    <!-- after the content is loaded, hide the loader -->
+    <script>
+        document.getElementById('loader').style.display = 'none';
+    </script>
+</body>
+
+</html>

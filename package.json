@@ -1,0 +1,19 @@
+{
+    "private": true,
+    "name": "mare-pages-dev",
+    "version": "1.0.0",
+    "description": "mare.pages.dev source code",
+    "module": "./dist/_worker.js",
+    "scripts": {
+        "build": "rollup -c"
+    },
+    "license": "MIT",
+    "devDependencies": {
+        "@cloudflare/workers-types": "^4.20250321.0",
+        "@rollup/plugin-commonjs": "^28.0.3",
+        "@rollup/plugin-node-resolve": "^16.0.1",
+        "@rollup/plugin-terser": "^0.4.4",
+        "rollup": "^4.37.0",
+        "rollup-plugin-copy": "^3.5.0"
+    }
+}

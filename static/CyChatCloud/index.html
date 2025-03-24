@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<!-- saved from url=(0037)http://catalog.neet.tv/harlequin.html -->
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canvas Word Cloud</title>
+    </script>
+    <script type="text/javascript" src="/CyChatCloud/javascripts/skipwords.js"></script>
+    <script type="text/javascript" src="/CyChatCloud/javascripts/fourcat-cloud.js"></script>
+    <style type="text/css" media="screen">
+        body {
+            padding: 20px;
+            margin: 0;
+            font: 18px Times;
+            color: #222;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px dotted #aaa;
+        }
+
+        #settings table {
+            width: 100%;
+        }
+
+        #settings table td {
+            min-width: 250px;
+            vertical-align: top;
+        }
+
+        #canvas {
+            margin-top: 25px;
+        }
+
+        #words {
+            width: 220px;
+            height: 50px;
+        }
+
+        #progress {
+            font: 13px monospace;
+        }
+
+        .noclr .clr,
+        .steps {
+            display: none;
+        }
+
+        .clr {
+            vertical-align: top;
+            width: 28px;
+            height: 23px;
+            line-height: 1;
+            cursor: pointer;
+            border: 0;
+            padding: 0;
+        }
+
+        p {
+            padding: 0;
+            margin: 0 0 15px 0;
+        }
+
+        h2,
+        h4 {
+            margin: 0 0 10px 0;
+            padding: 0;
+        }
+
+        input,
+        select,
+        textarea {
+            display: block;
+            margin: 3px 0 10px 0;
+        }
+
+        .clrset input {
+            display: inline-block;
+        }
+
+        .protip {
+            font-size: 16px;
+            color: #555;
+        }
+
+        @font-face {
+            font-family: 'DeliciousHeavy';
+            src: url('./fonts/Delicious_Heavy.ttf');
+        }
+
+        @font-face {
+            font-family: 'mplus';
+            src: url('./fonts/mplus-2c-thin.ttf');
+        }
+
+        @font-face {
+            font-family: 'IMFell';
+            src: url('./fonts/im_fell_english_pro.ttf');
+        }
+
+        @font-face {
+            font-family: 'meguca';
+            src: url('./fonts/MadokaRunes.ttf');
+        }
+
+        a {
+            color: #000;
+            text-decoration: none;
+            border-bottom: 1px dotted #000;
+        }
+
+        a:hover {
+            border-bottom: 1px solid #000;
+        }
+
+        #more {
+            position: absolute;
+            top: 7px;
+            font-size: 12px;
+        }
+
+        #font-preloader {
+            text-indent: -9001px;
+        }
+
+        #deliciousheavy {
+            font-family: DeliciousHeavy;
+        }
+
+        #mplus {
+            font-family: mplus;
+        }
+
+        #imfell {
+            font-family: IMFell;
+        }
+
+        #meguca {
+            font-family: meguca;
+        }
+    </style>
+</head>
+
+<body class="" cz-shortcut-listen="true">
+    <span id="more">« <a href="/">back to mares</a></span>
+    <div id="settings">
+        <table>
+            <tbody>
+                <tr>
+                    <td>
+                        <h2>HTML5 word cloud generator</h2>
+                        <p>
+                            Data type:
+                            <select name="datatype" id="datatype" size="1">
+                                <option value="cytube">Cytube JSON</option>
+                                <option value="fourchan">4chan single thread</option>
+                            </select>
+                        </p>
+                        <div class="steps" id="protip-cytube" style="display: none;">
+                            <p>
+                                Select Replay JSON and click render;
+                                <br>
+                                (<a href="/CyChatCloud/concat">Concat files</a> / <a href="/CyChatCloud/timestamps">Get media
+                                    timestamps</a>)
+                            </p>
+                            <input id="filter-emotes" type="checkbox" style="display: inline-block;">
+                            <label for="filter-emotes"> Filter Emotes</label>
+                            <div>
+                                From: (js timestamp)
+                                <input id="ts-from">
+                                To: (js timestamp)
+                                <input id="ts-to">
+                            </div>
+                            <input id="file" type="file">
+                        </div>
+                        <div class="steps" id="protip-fourchan" style="display: none;">
+                            <p>
+                                Paste the HTML source of the thread you want to process in the box below:<br>
+                                Open the thread's page, Right click, <em>View page source</em>, copy the HTML code,
+                                paste it in the
+                                <em>Data</em> box below, click <em>Render</em>.<br>
+                                Make sure to refresh (F5) the page before doing this if you are using the Thread
+                                Updater.
+                            </p>
+                            Data:
+                            <textarea name="words" id="words"></textarea>
+                        </div>
+                        <button id="render" disabled>Render</button>
+                        <button id="cancel" disabled="">Cancel</button>
+                        <span id="progress"></span>
+                    </td>
+                    <td>
+                        Canvas width<span class="protip"> — pixels:</span>
+                        <input type="text" name="canvaswidth" value="1000" id="canvaswidth">
+                        Canvas height<span class="protip"> — pixels:</span>
+                        <input type="text" name="canvasheight" value="1000" id="canvasheight">
+                        Word limit: <input type="text" name="wordlimit" value="400" id="wordlimit">
+                        Step <span class="protip"> — higher is faster/less precise:</span>
+                        <input type="text" name="step" value="0.05" id="step">
+                    </td>
+                    <td>
+                        Background color<span class="protip"> — css syntax:</span>
+                        <div class="clrset"><input type="text" name="bgcolor" value="#211e1e" id="bgcolor"><input
+                                data-target="bgcolor" class="clr" type="color"></div>
+                        Gradient high color<span class="protip"> — css syntax:</span>
+                        <div class="clrset"><input type="text" name="gradhigh" value="#c0c044" id="gradhigh"><input
+                                data-target="gradhigh" class="clr" type="color"></div>
+                        Gradient low color<span class="protip"> — css syntax:</span>
+                        <div class="clrset"><input type="text" name="gradlow" value="#6969fa" id="gradlow"><input
+                                data-target="gradlow" class="clr" type="color"></div>
+                        Palette type:
+                        <select name="gradtype" id="gradtype" size="1">
+                            <option value="random">Random</option>
+                            <option value="heat">Heat</option>
+                        </select>
+                    </td>
+                    <td>
+                        Font:
+                        <select name="font" id="font" size="1">
+                            <option value="Times New Roman">Times New Roman</option>
+                            <option value="Georgia">Georgia</option>
+                            <option value="Arial">Arial</option>
+                            <option value="DeliciousHeavy">Delicious Heavy</option>
+                            <option value="mplus">M+ Thin</option>
+                            <option value="IMFell">IM Fell English Pro</option>
+                            <option value="meguca">Meguca</option>
+                        </select>
+                        Max font size<span class="protip"> — pixels:</span>
+                        <input type="text" name="fontsizemax" value="100" id="fontsizemax">
+                        Min font size<span class="protip"> — pixels:</span>
+                        <input type="text" name="fontsizemin" value="16" id="fontsizemin">
+                        Word padding<span class="protip"> — pixels:</span>
+                        <input type="text" name="padding" value="1" id="padding">
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <hr>
+    <canvas width="1000" height="1000" id="canvas"></canvas>
+    <script type="text/javascript">
+
+        var rendering = false;
+        var fileLoaded = false;
+        let loadedFileText = '';
+        var countWords = {
+            fourchan: function (id, skipwords) {
+                var
+                    word, postwords = [], wordcount = {},
+                    target = document.getElementById(id),
+                    entities = document.createElement('div'),
+                    posts;
+
+                if (/<meta name="generator" content="FoolFuuka/.test(target.value)) {
+                    posts = target.value.match(/<div class="text"[^>]*>(.*?)<\/div>/g);
+                }
+                else {
+                    posts = target.value.match(/<blockquote [^>]+>(.*?)<\/blockquote>/g);
+                }
+
+                if (posts) {
+                    for (var i = posts.length - 1; i >= 0; i--) {
+                        entities.innerHTML = posts[i].replace(/(<\/?[^>]*>)/g, ' ');
+                        postwords = entities.childNodes[0].nodeValue.replace(/['’`]s\s/gi, ' ').split(' ');
+                        for (var j = postwords.length - 1; j >= 0; j--) {
+                            word = postwords[j]
+                                .toLowerCase()
+                                .replace(/^[\]\}\)>~_\-\+\*«%…“’”‘"'`,;:.!?\(\)]+|[»~\*…“’”‘"'`,;:.!?\(\)]+$/g, '')
+                                .replace(/^\s*(\S*(\s+\S+)*)\s*$/g, "$1");
+                            if (word.length < 2 ||
+                                skipwords[word] ||
+                                word.match(/(^[a-z]+:\/\/)|(^[^a-z]+$)/i)) {
+                                continue;
+                            }
+                            if (wordcount[word]) {
+                                wordcount[word] += 1;
+                            }
+                            else {
+                                wordcount[word] = 1;
+                            }
+                        }
+                    }
+                }
+                return wordcount;
+            },
+            cytube: async function (id, skipwords) {
+                try {
+                    if (fileLoaded) {
+                        let from = document.getElementById('ts-from');
+                        let to = document.getElementById('ts-to');
+                        let div = document.createElement('div');
+                        let wordcount = {};
+                        let json = window.jasone = JSON.parse(loadedFileText);
+                        if (isNaN(parseInt(from.value))) {
+                            let val = json.eventsLog[0].time;
+                            from.value = val;
+                            from = val;
+                        }
+                        else from = parseInt(from.value);
+                        if (isNaN(parseInt(to.value))) {
+                            let val = json.eventsLog[json.eventsLog.length - 1].time;
+                            to.value = val;
+                            to = val;
+                        }
+                        else to = parseInt(to.value);
+                        if (from > to) [from, to] = [to, from];
+                        let msgs = json.eventsLog.filter(e => e.type === 'chatMsg' && e.time >= from && e.time <= to).map(e => e.data[0].msg);
+                        if (document.getElementById('filter-emotes').checked && msgs.length) {
+                            let emoteListEvents = json.eventsLog.map((e, i) => [e.time < to && e.type === 'emoteList', i, e.time]).filter(([e, i, time]) => e);
+                            if (emoteListEvents.length) {
+                                let currIdx;
+                                if (emoteListEvents[0][2] > from) {
+                                    currIdx = json.eventsLog.findIndex(e => e.time >= from);
+                                }
+                                else {
+                                    currIdx = emoteListEvents.reverse().find(([e, i, time]) => time < from)[1];
+                                }
+                                const regexify = (emote) => {
+                                    emote.regex = new RegExp(emote.source, 'gi');
+                                    return emote;
+                                };
+                                let emotes = [];
+                                const newMsgs = [];
+                                //let emoteMap = {};
+                                //window.emm = emoteMap;
+
+                                let evsCount = json.eventsLog.slice(currIdx).findIndex((e, i, a) => (i + 1 === a.length || e.time >= to));
+                                let currEvCount = 0;
+                                while (currIdx < json.eventsLog.length && json.eventsLog[currIdx].time < to) {
+                                    let event = json.eventsLog[currIdx];
+                                    switch (event.type) {
+                                        case 'emoteList': {
+                                            emotes = event.data[0].map(regexify);
+                                        }
+                                            break;
+                                        case 'updateEmote': {
+                                            let emoteIdx = emotes.findIndex(e => e.name === event.data[0].name);
+                                            if (emoteIdx !== -1) emotes[emoteIdx] = regexify(event.data[0]);
+                                            else emotes.push(regexify(event.data[0]));
+                                        }
+                                            break;
+                                        case 'renameEmote': {
+                                            let emoteIdx = emotes.findIndex(e => e.name === event.data[0].old);
+                                            delete event.data[0].old;
+                                            if (emoteIdx !== -1) emotes[emoteIdx] = regexify(event.data[0]);
+                                            else emotes.push(regexify(event.data[0]));
+                                        }
+                                            break;
+                                        case 'removeEmote': {
+                                            let emoteIdx = emotes.findIndex(e => e.name === event.data[0]);
+                                            if (emoteIdx !== -1) emotes.splice(emoteIdx, 1);
+                                        }
+                                            break;
+                                        case 'chatMsg': {
+                                            if (event.time > from && event.time < to) {
+                                                let msg = event.data[0].msg;
+                                                emotes.forEach(emote => {
+                                                    // msg = msg.replaceAll(emote.regex, () => {
+                                                    //     emoteMap[emote.name] = (emoteMap[emote.name] ?? 0) + 1;
+                                                    //     return '';
+                                                    // });
+                                                    msg = msg.replaceAll(emote.regex, '');
+                                                });
+                                                newMsgs.push(msg);
+                                            }
+                                        }
+                                            break;
+                                    }
+                                    if (currEvCount % 5000 === 0) {
+                                        await new Promise(r => setTimeout(r, 1));
+                                        console.log('Evs (', currEvCount + 1, '/', evsCount, ')');
+                                    }
+                                    currIdx++;
+                                    currEvCount++;
+                                }
+                                msgs = newMsgs;
+                            } else {
+                                //fallback to simple filter
+                                msgs = msgs.map(msg => msg.replaceAll(/:[\w.]+:/g, ''));
+                            }
+                        }
+                        msgs.forEach(msg => {
+                            div.innerHTML = msg.replace(/(<\/?[^>]*>)/g, ' ');
+                            let postwords = div.innerText.replace(/['’`]s\s/gi, ' ').split(' ');
+                            for (var j = postwords.length - 1; j >= 0; j--) {
+                                let word = postwords[j]
+                                    .toLowerCase()
+                                    .replace(/^[\]\}\)>~_\-\+\*«%…“’”‘"'`,;:.!?\(\)]+|[»~\*…“’”‘"'`,;:.!?\(\)]+$/g, '')
+                                    .replace(/^\s*(\S*(\s+\S+)*)\s*$/g, "$1");
+                                if (word.length < 2 ||
+                                    skipwords[word] ||
+                                    word.match(/(^[a-z]+:\/\/)|(^[^a-z]+$)/i)) {
+                                    continue;
+                                }
+                                if (wordcount[word]) {
+                                    wordcount[word] += 1;
+                                }
+                                else {
+                                    wordcount[word] = 1;
+                                }
+                            }
+                        })
+                        return wordcount;
+                    }
+                }
+                catch (e) { console.log(e); }
+            }
+        };
+        var changeSteps = {
+            fourchan: function () {
+                if (!rendering) {
+                    document.getElementById('words').value = "";
+                    document.getElementById('render').disabled = false;
+                }
+            },
+            cytube: function () {
+                if (!rendering) {
+                    document.getElementById('render').disabled = !fileLoaded;
+                }
+            }
+        };
+
+        function onFileChange() {
+            var reader = new FileReader();
+            reader.onload = function () {
+                if (!rendering) {
+                    loadedFileText = reader.result;
+                    fileLoaded = true;
+                    document.getElementById('render').disabled = false;
+                }
+            };
+            reader.readAsText(this.files[0]);
+        }
+
+        function showSteps() {
+            var sel, tips = document.getElementsByClassName('steps');
+            for (var i = tips.length - 1; i >= 0; i--) {
+                tips[i].style.display = 'none';
+            }
+            sel = document.getElementById('datatype');
+            document.getElementById('protip-' + sel.options[sel.selectedIndex].value)
+                .style.display = 'block';
+            changeSteps[sel.options[sel.selectedIndex].value]();
+        }
+
+        function hasColorPicker() {
+            var el = document.createElement('input');
+            el.type = 'color';
+            return el.type === 'color';
+        }
+
+        function onColorChange() {
+            var id = this.getAttribute('data-target');
+            document.getElementById(id).value = this.value;
+        }
+
+        function initColorPickers() {
+            var i, el, nodes;
+
+            nodes = document.getElementsByClassName('clr');
+
+            for (i = 0; el = nodes[i]; ++i) {
+                el.value = document.getElementById(el.getAttribute('data-target')).value;
+                el.addEventListener('change', onColorChange, false);
+            }
+
+            document.body.className = '';
+        }
+
+        window.onload = function () {
+            var
+                settningsElm = document.getElementById('settings'),
+                progressElm = document.getElementById('progress'),
+                renderBtn = document.getElementById('render'),
+                cancelBtn = document.getElementById('cancel'),
+                cloud = new Cloud(),
+                dummy = document.createElement('canvas');
+
+            if (!window.Worker) {
+                settningsElm.innerHTML = "Your browser doesn't support Web Workers.";
+                return;
+            }
+            if (!dummy.getContext) {
+                settningsElm.innerHTML = "Your browser doesn't support Canvas.";
+                return;
+            }
+            if (typeof dummy.getContext('2d').fillText != 'function') {
+                settningsElm.innerHTML = "Your browser doesn't support Canvas Text.";
+                return;
+            }
+
+            if (hasColorPicker()) {
+                initColorPickers();
+            }
+
+            showSteps();
+
+            document.getElementById('datatype').onchange = showSteps;
+            document.getElementById('file').onchange = onFileChange;
+
+            cancelBtn.onclick = function () {
+                cloud.stop();
+                progressElm.innerHTML = '';
+                renderBtn.disabled = false;
+                cancelBtn.disabled = true;
+                rendering = false;
+            };
+
+            renderBtn.onclick = async function () {
+                var datatype, wordcount, font, gt, opts, start, end;
+
+                font = document.getElementById('font');
+                font = font.options[font.selectedIndex].value;
+
+                gt = document.getElementById('gradtype');
+                gt = gt.options[gt.selectedIndex].value == 'random';
+
+                opts = {
+                    fontfamily: font,
+                    canvaswidth: parseInt(document.getElementById('canvaswidth').value),
+                    canvasheight: parseInt(document.getElementById('canvasheight').value),
+                    bgcolor: document.getElementById('bgcolor').value,
+                    gradienthigh: document.getElementById('gradhigh').value,
+                    gradientlow: document.getElementById('gradlow').value,
+                    gradientrandom: gt,
+                    wordlimit: parseInt(document.getElementById('wordlimit').value),
+                    fontsizemax: parseInt(document.getElementById('fontsizemax').value),
+                    fontsizemin: parseInt(document.getElementById('fontsizemin').value),
+                    padding: parseInt(document.getElementById('padding').value),
+                    step: parseFloat(document.getElementById('step').value),
+                    ondone: function (placed) {
+                        end = (new Date()).getTime() - start;
+                        end = end / 1000;
+                        progressElm.innerHTML = 'Done, placed ' + placed + ' elements in '
+                            + end + 's';
+                        renderBtn.disabled = false;
+                        cancelBtn.disabled = true;
+                        rendering = false;
+                    },
+                    progress: progressElm
+                };
+
+                if (opts.step < 0.01) {
+                    alert('Invalid value for "step", minimum is 0.01');
+                    return;
+                }
+
+                cancelBtn.disabled = false;
+                this.disabled = true;
+                rendering = true;
+
+                datatype = document.getElementById('datatype');
+                datatype = datatype.options[datatype.selectedIndex].value;
+                wordcount = countWords[datatype]('words', skipwords);
+                if (wordcount instanceof Promise) wordcount = await wordcount;
+                start = (new Date()).getTime();
+                cloud.generate('canvas', wordcount, opts);
+            };
+        };
+    </script>
+    <div id="font-preloader">
+        <!-- Lazy font preloading -->
+        <div id="deliciousheavy">Delicious Heavy</div>
+        <div id="mplus">M+ Light</div>
+        <div id="imfell">IM Fell English Pro</div>
+        <div id="meguca">Meguca</div>
+    </div>
+
+
+</body>
+
+</html>

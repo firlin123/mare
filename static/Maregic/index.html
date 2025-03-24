@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maregic</title>
+    <style>
+        html {
+            color: #3e77cb;
+            font-weight: bold;
+            background: #fee995;
+        }
+
+        body {
+            background-image: url(/Maregic/img/bg.png);
+            background-repeat: repeat-x;
+            position: relative;
+            margin: 0;
+            padding: 8px;
+        }
+
+        body:after {
+            content: '';
+            position: fixed;
+            background: url(/Maregic/img/cm.png) no-repeat center;
+            right: 30px;
+            bottom: 30px;
+            width: 150px;
+            height: 150px;
+        }
+
+        tr:first-child {
+            color: #fee995;
+        }
+
+        img {
+            border: 1px solid silver;
+            background: #0000000f;
+        }
+    </style>
+</head>
+
+<body>
+    <form autocomplete="off">
+        <table>
+            <tr>
+                <td>Cover: <input type="file" id="cover"></td>
+                <td>Hide: <input type="file" id="hide"></td>
+            </tr>
+            <tr>
+                <td><img width="700" height="720" id="outputCover"
+                        src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7">
+                </td>
+                <td><img width="700" height="720" id="outputHide"
+                        src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7">
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <p>Hide brightness: <input type="range" min="0" max="254" step="1" value="200" id="brightness"></p>
+                    <p>Cover darkness: <input type="range" min="1" max="255" step="1" value="25" id="darkness"></p>
+                    <p>Gamma: <input type="range" min="1000" max="10000" step="1" value="2000" id="gamma"></p>
+                </td>
+                <td>
+                    <p>Width x Height: <input value="700x720" id="widthXHeight"> <button id="widthXHeightSet"
+                            type="button">set</button>
+                    </p>
+                    <p><button id="download" type="button">Download</button></p>
+                </td>
+            </tr>
+        </table>
+    </form>
+    <script>
+        let widthXHeight = document.getElementById('widthXHeight');
+        let widthXHeightSet = document.getElementById('widthXHeightSet');
+        let outputCover = document.getElementById('outputCover');
+        let outputHide = document.getElementById('outputHide');
+        let cover = document.getElementById("cover");
+        let hide = document.getElementById("hide");
+        let hideBrightness = document.getElementById("brightness");
+        let coverDarkness = document.getElementById("darkness");
+        let gamma = document.getElementById("gamma");
+        let download = document.getElementById("download");
+
+        function downloadBlob(blob, name) {
+            let url = URL.createObjectURL(blob);
+            let a = document.createElement('a');
+            a.download = name;
+            a.href = url;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        if (typeof (Worker) !== "undefined") {
+            setupWorker();
+        }
+        else {
+            setupLocal();
+        }
+
+        function setupWorker() {
+            let scriptText = `${getWorkerOutside.toString()}\n${setup.toString()}\nsetup(getWorkerOutside());`;
+            let scriptBlob = new Blob([scriptText], { type: 'text/javascript; charset=UTF-8' });
+            let scriptUrl = URL.createObjectURL(scriptBlob);
+            let worker = new Worker(scriptUrl);
+            cover.addEventListener("change", createFileHandler(true));
+            hide.addEventListener("change", createFileHandler(false));
+            hideBrightness.addEventListener("change", createBrightnessDarknessHandler(true));
+            coverDarkness.addEventListener("change", createBrightnessDarknessHandler(false));
+            gamma.addEventListener("change", () => {
+                worker.postMessage({ act: "gammaChange", value: gamma.valueAsNumber });
+            });
+            widthXHeightSet.addEventListener("click", () => {
+                worker.postMessage({ act: "widthXHeightSet", value: widthXHeight.value });
+            });
+            download.addEventListener("click", () => {
+                worker.postMessage({ act: "downloadRequest" });
+            });
+
+            function createBrightnessDarknessHandler(isBrightness) {
+                return (e) => {
+                    worker.postMessage({ act: "brightnessDarknessChange", value: e.target.valueAsNumber, isBrightness });
+                };
+            }
+
+            function createFileHandler(isCover) {
+                return (e) => {
+                    worker.postMessage({ act: "imgSelected", file: e.target.files[0], isCover });
+                };
+            }
+
+            worker.onmessage = (e) => {
+                switch (e.data.act) {
+                    case "setOutputWidthHeight": {
+                        let { width, height } = e.data;
+                        outputCover.width = width;
+                        outputCover.height = height;
+                        outputHide.width = width;
+                        outputHide.height = height;
+                    }
+                        break;
+                    case "setWidthXHeightValue": {
+                        let { value } = e.data;
+                        widthXHeight.value = value;
+                    }
+                        break;
+                    case "updateOutput": {
+                        let { blob, isCover } = e.data;
+                        let url = URL.createObjectURL(blob);
+                        let img = isCover ? outputCover : outputHide;
+                        img.onload = (e) => {
+                            URL.revokeObjectURL(url);
+                        }
+                        img.onerror = (e) => {
+                            URL.revokeObjectURL(url);
+                        }
+                        img.src = url;
+                    }
+                        break;
+                    case "download": {
+                        let { blob, name } = e.data;
+                        downloadBlob(blob, name);
+                    }
+                        break;
+                    case "error": {
+                        let { error } = e.data;
+                        console.error(error);
+                    }
+                        break;
+
+                }
+            }
+        }
+
+        function setupLocal() {
+            setup(getLocalOutside());
+        }
+
+        function getWorkerOutside() {
+            return {
+                /**
+                 * Gets canvas.
+                 * @returns {OffscreenCanvas || HTMLCanvasElement}
+                 */
+                getCanvas: () => {
+                    return new OffscreenCanvas(700, 720);
+                },
+                /**
+                 * Sets widthXHeight.value.
+                 * @param {string} value 
+                 */
+                setWidthXHeightValue: (value) => {
+                    postMessage({ act: 'setWidthXHeightValue', value });
+                },
+                /**
+                 * Sets output width and height.
+                 * @param {number} width 
+                 * @param {number} height 
+                 */
+                setOutputWidthHeight: (width, height) => {
+                    postMessage({ act: 'setOutputWidthHeight', width, height });
+                },
+                /**
+                 * Updates output image.
+                 * @param {Blob} blob 
+                 * @param {boolean} isCover 
+                 */
+                updateOutput: (blob, isCover) => {
+                    postMessage({ act: "updateOutput", blob, isCover });
+                },
+                /**
+                 * Downloads blob.
+                 * @param {Blob} blob
+                 */
+                download: (blob, name) => {
+                    postMessage({ act: "download", blob, name });
+                },
+                /**
+                 * Converts canvas to blob.
+                 * @param {OffscreenCanvas | HTMLCanvasElement} canvas 
+                 * @returns {Promise<Blob>}
+                 */
+                canvasToBlob: (canvas) => {
+                    return canvas.convertToBlob();
+                },
+                /**
+                 * Sets handlers.
+                 * @param {Record<string, (data: any) => void>} handlers 
+                 * @returns {Record<string, (data: any) => void>}
+                 */
+                setHandlers: (handlers) => {
+                    onmessage = (e) => {
+                        if (e.data.act in handlers) {
+                            handlers[e.data.act](e.data);
+                        }
+                    };
+                    return handlers;
+                },
+                /**
+                 * Registers onImgLoaded handler.
+                 * @param {Record<string, (data: any) => void>} handlers
+                 * @param {(img: ImageBitmap | HTMLImageElement, isCover: boolean) => void} handler
+                 */
+                registerOnImgLoaded: (handlers, handler) => {
+                    handlers['imgSelected'] = (data) => {
+                        createImageBitmap(data.file).then(img => {
+                            handler(img, data.isCover);
+                        }).catch(e => {
+                            postMessage({ act: 'error', error: e });
+                        });
+                    }
+                },
+                /**
+                 * Registers onBrightnessDarknessChange handler.
+                 * @param {Record<string, (data: any) => void>} handlers
+                 * @param {(value: number, isBrightness: boolean) => void} handler
+                 */
+                registerOnBrightnessDarknessChange: (handlers, handler) => {
+                    handlers['brightnessDarknessChange'] = (data) => {
+                        handler(data.value, data.isBrightness);
+                    }
+                },
+                /**
+                 * Registers onGammaChange handler.
+                 * @param {Record<string, (data: any) => void>} handlers
+                 * @param {(value: number) => void} handler
+                 */
+                registerOnGammaChange: (handlers, handler) => {
+                    handlers['gammaChange'] = (data) => {
+                        handler(data.value);
+                    }
+                },
+                /**
+                 * Registers onWidthHeightChange handler.
+                 * @param {Record<string, (data: any) => void>} handlers
+                 * @param {(value: string) => void} handler
+                 */
+                registerOnWidthXHeightSet: (handlers, handler) => {
+                    handlers['widthHeightChange'] = (data) => {
+                        handler(data.value);
+                    }
+                },
+                /**
+                 * Registers onDownloadRequested handler.
+                 * @param {Record<string, (data: any) => void>} handlers
+                 * @param {() => void} handler
+                 */
+                registerOnDownloadRequested: (handlers, handler) => {
+                    handlers['downloadRequest'] = (data) => {
+                        handler();
+                    }
+                }
+            };
+        }
+
+        function getLocalOutside() {
+            let outsideHandlers = {};
+
+            cover.addEventListener("change", createFileHandler(true));
+            hide.addEventListener("change", createFileHandler(false));
+            hideBrightness.addEventListener("change", () => {
+                outsideHandlers["brightnessDarknessChange"]({ value: hideBrightness.valueAsNumber, isBrightness: true });
+            });
+            coverDarkness.addEventListener("change", () => {
+                outsideHandlers["brightnessDarknessChange"]({ value: coverDarkness.valueAsNumber, isBrightness: false });
+            });
+            gamma.addEventListener("change", () => {
+                outsideHandlers["gammaChange"]({ value: gamma.valueAsNumber });
+            });
+            widthXHeightSet.addEventListener("click", () => {
+                outsideHandlers["widthXHeightSet"]({ value: widthXHeight.value });
+            });
+            download.addEventListener("click", () => {
+                outsideHandlers["downloadRequest"]({});
+            });
+
+            function createFileHandler(isCover) {
+                return (e) => {
+                    let img = new Image();
+                    let url = URL.createObjectURL(e.target.files[0]);
+                    img.addEventListener('load', (e) => {
+                        URL.revokeObjectURL(url);
+                        outsideHandlers['imgLoad']({ img, isCover });
+                    });
+                    img.addEventListener('error', (e) => {
+                        URL.revokeObjectURL(url);
+                    });
+                    img.src = url;
+                };
+            }
+
+            return {
+                /**
+                 * Gets canvas.
+                 * @returns {OffscreenCanvas || HTMLCanvasElement}
+                 */
+                getCanvas: () => {
+                    let canvas = document.createElement("canvas");
+                    canvas.width = 700;
+                    canvas.height = 720;
+                    return canvas;
+                },
+                /**
+                 * Sets widthXHeight.value.
+                 * @param {string} value 
+                 */
+                setWidthXHeightValue: (value) => {
+                    widthXHeight.value = value;
+                },
+                /**
+                 * Sets output width and height.
+                 * @param {number} width 
+                 * @param {number} height 
+                 */
+                setOutputWidthHeight: (width, height) => {
+                    outputCover.width = width;
+                    outputCover.height = height;
+                    outputHide.width = width;
+                    outputHide.height = height;
+                },
+                /**
+                 * Updates output image.
+                 * @param {Blob} blob 
+                 * @param {boolean} isCover 
+                 */
+                updateOutput: (blob, isCover) => {
+                    let img = isCover ? outputCover : outputHide;
+                    let url = URL.createObjectURL(blob);
+                    img.onload = (e) => {
+                        URL.revokeObjectURL(url);
+                    };
+                    img.onerror = (e) => {
+                        URL.revokeObjectURL(url);
+                    }
+                    img.src = url;
+                },
+                /**
+                 * Downloads blob.
+                 * @param {Blob} blob
+                 */
+                download: (blob, name) => {
+                    downloadBlob(blob, name);
+                },
+                /**
+                 * Converts canvas to blob.
+                 * @param {OffscreenCanvas | HTMLCanvasElement} canvas 
+                 * @returns {Promise<Blob>}
+                 */
+                canvasToBlob: (canvas) => {
+                    return new Promise(resolve => canvas.toBlob(resolve));
+                },
+                /**
+                 * Sets handlers.
+                 * @param {Record<string, (data: any) => void>} handlers 
+                 * @returns {Record<string, (data: any) => void>}
+                 */
+                setHandlers: (handlers) => {
+                    outsideHandlers = handlers;
+                    return handlers;
+                },
+                /**
+                 * Registers onImgLoaded handler.
+                 * @param {Record<string, (data: any) => void>} handlers
+                 * @param {(img: ImageBitmap | HTMLImageElement, isCover: boolean) => void} handler
+                 */
+                registerOnImgLoaded: (handlers, handler) => {
+                    handlers['imgLoad'] = (data) => {
+                        handler(data.img, data.isCover);
+                    };
+                },
+                /**
+                 * Registers onBrightnessDarknessChange handler.
+                 * @param {Record<string, (data: any) => void>} handlers
+                 * @param {(value: number, isBrightness: boolean) => void} handler
+                 */
+                registerOnBrightnessDarknessChange: (handlers, handler) => {
+                    handlers['brightnessDarknessChange'] = (data) => {
+                        handler(data.value, data.isBrightness);
+                    }
+                },
+                /**
+                 * Registers onGammaChange handler.
+                 * @param {Record<string, (data: any) => void>} handlers
+                 * @param {(value: number) => void} handler
+                 */
+                registerOnGammaChange: (handlers, handler) => {
+                    handlers['gammaChange'] = (data) => {
+                        handler(data.value);
+                    }
+                },
+                /**
+                 * Registers onWidthHeightChange handler.
+                 * @param {Record<string, (data: any) => void>} handlers
+                 * @param {(value: string) => void} handler
+                 */
+                registerOnWidthXHeightSet: (handlers, handler) => {
+                    handlers['widthXHeightSet'] = (data) => {
+                        handler(data.value);
+                    }
+                },
+                /**
+                 * Registers onDownloadRequested handler.
+                 * @param {Record<string, (data: any) => void>} handlers
+                 * @param {() => void} handler
+                 */
+                registerOnDownloadRequested: (handlers, handler) => {
+                    handlers['downloadRequest'] = (data) => {
+                        handler();
+                    }
+                }
+            };
+        }
+
+        function setup(outside) {
+            let handlers = outside.setHandlers({});
+            let canvas = outside.getCanvas();
+            let ctx = canvas.getContext('2d', { willReadFrequently: true });
+            let maxWidth = 700;
+            let maxHeight = 720;
+            /**
+             * @type {ImageBitmap | HTMLImageElement}
+             */
+            let coverImg = null;
+            /**
+             * @type {ImageBitmap | HTMLImageElement}
+             */
+            let hideImg = null;
+            /**
+             * @type {ImageData}
+             */
+            let coverData = null;
+            /**
+             * @type {ImageData}
+             */
+            let hideData = null;
+            let hideLoaded = false;
+            let coverLoaded = false;
+            let brightnessVal = 200;
+            let darknessVal = 25;
+            let gammaVal = 2000;
+            let latestOutputBlob = null;
+
+            outside.registerOnImgLoaded(handlers, onImgLoaded);
+            outside.registerOnBrightnessDarknessChange(handlers, onBrightnessDarknessChange);
+            outside.registerOnGammaChange(handlers, onGammaChange);
+            outside.registerOnWidthXHeightSet(handlers, onWidthXHeightSet);
+            outside.registerOnDownloadRequested(handlers, onDownloadRequested);
+
+            /**
+             * Width and height change handler.
+             */
+            function onDownloadRequested() {
+                if (latestOutputBlob != null) {
+                    outside.download(latestOutputBlob, "output.png");
+                }
+            }
+
+            /**
+             * Width x height set handler.
+             * @param {string} value
+             */
+            function onWidthXHeightSet(value) {
+                let [widthStr, heightStr] = value.split('x');
+                let width = parseInt(widthStr);
+                let height = parseInt(heightStr);
+                if (width > 0 && !isNaN(width) && height > 0 && !isNaN(height)) {
+                    setWidthHeight(width, height);
+                    if (hideLoaded && coverLoaded) updateImageData();
+                }
+            }
+
+            /**
+             * Gamma change handler.
+             * @param {number} value 
+             */
+            function onGammaChange(value) {
+                gammaVal = value;
+                if (hideLoaded && coverLoaded) updateGamma();
+            }
+
+            /**
+             * Brightness or darkness change handler.
+             * @param {number} value 
+             * @param {boolean} isBrightness 
+             */
+            function onBrightnessDarknessChange(value, isBrightness) {
+                if (isBrightness) brightnessVal = value;
+                else darknessVal = value;
+                if (hideLoaded && coverLoaded) redraw();
+            }
+
+            /**
+             * Image loaded handler.
+             * @param {ImageBitmap | HTMLImageElement} img 
+             * @param {boolean} isCover 
+             */
+            function onImgLoaded(img, isCover) {
+                if (isCover) {
+                    let multiplier = 1;
+                    let biggerDimention = img.width > img.height ? img.width : img.height;
+                    if (biggerDimention < 700) {
+                        multiplier = Math.ceil(700 / biggerDimention);
+                    }
+                    setWidthHeight(img.width * multiplier, img.height * multiplier);
+
+                    outside.setWidthXHeightValue(`${img.width * multiplier}x${img.height * multiplier}`);
+                    coverImg = img;
+                    coverLoaded = true;
+                    if (hideLoaded) updateImageData();
+                }
+                else {
+                    hideImg = img;
+                    hideLoaded = true;
+                    if (coverLoaded) updateImageData();
+                }
+            }
+
+            /**
+             * Sets width and height of the canvas and output preview.
+             * @param {number} width 
+             * @param {number} height 
+             */
+            function setWidthHeight(width, height) {
+                let resultWidth = width;
+                let resultHeight = height;
+                if (width > maxWidth || height > maxHeight) {
+                    if (maxWidth * height / width > maxHeight) {
+                        resultWidth = maxHeight * width / height;
+                        resultHeight = maxHeight;
+                    }
+                    else {
+                        resultWidth = maxWidth;
+                        resultHeight = maxWidth * height / width;
+                    }
+                }
+                outside.setOutputWidthHeight(resultWidth, resultHeight);
+                canvas.width = width;
+                canvas.height = height;
+            }
+
+            /**
+             * Extracts image data from loaded images.
+             */
+            function updateImageData() {
+                //ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#000'
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                drawImage(coverImg);
+                coverData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+                //ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#fff'
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                drawImage(hideImg);
+                hideData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+                redraw();
+            }
+
+            /**
+             * Draws image to the center of canvas.
+             * @param {ImageBitmap | HTMLImageElement} img 
+             */
+            function drawImage(img) {
+                let width, height, widthOffset = 0, heightOffset = 0;
+                if (canvas.width * img.height / img.width > canvas.height) {
+                    width = canvas.height * img.width / img.height;
+                    height = canvas.height;
+                    widthOffset = Math.round((canvas.width - width) / 2);
+                }
+                else {
+                    width = canvas.width;
+                    height = canvas.width * img.height / img.width;
+                    heightOffset = Math.round((canvas.height - height) / 2);
+                }
+                ctx.drawImage(img, widthOffset, heightOffset, width, height);
+            }
+
+            async function redraw() {
+                let data = new Uint8ClampedArray(canvas.width * canvas.height * 4);
+                for (let i = 0; i < canvas.height; i++) {
+                    for (let j = 0; j < canvas.width; j++) {
+                        for (let k = 0; k < 4; k++) {
+                            let value;
+                            if (j % 2 == 0 || i % 2 == 0) {
+                                value = coverData.data[i * canvas.width * 4 + j * 4 + k];
+                                if (k !== 3) value = Math.round(value * (255 - darknessVal) / 255);
+
+                            }
+                            else {
+                                value = hideData.data[i * canvas.width * 4 + j * 4 + k];
+                                if (k !== 3) value = brightnessVal + Math.round(value * (255 - brightnessVal) / 255);
+                            }
+                            data[i * canvas.width * 4 + j * 4 + k] = value;
+                        }
+                    }
+                }
+                ctx.putImageData(new ImageData(data, canvas.width, canvas.height), 0, 0);
+                outside.updateOutput(await outside.canvasToBlob(canvas), true);
+                updateGamma();
+            }
+
+            /**
+             * Updates gamma on output png
+             */
+            async function updateGamma() {
+                let pngLayer = await outside.canvasToBlob(canvas).then(e => e.arrayBuffer()).then(e => new Uint8Array(e));
+                let srgbIndex = indexOfSubArray(pngLayer, stringToUint8Array("\0\0\0\x01sRGB"));
+                if (srgbIndex !== -1) {
+                    pngLayer = uint8ArrayConcat(pngLayer.slice(0, srgbIndex), pngLayer.slice(srgbIndex + 13));
+                }
+                let idatIndex = indexOfSubArray(pngLayer, stringToUint8Array("\0\0\x20\0IDAT"));
+                pngLayer = uint8ArrayConcat(pngLayer.slice(0, idatIndex), createPngGama(gammaVal), pngLayer.slice(idatIndex));
+
+                let blob = new Blob([pngLayer.buffer], { type: 'image/png' });
+                outside.updateOutput(blob, false);
+                latestOutputBlob = blob;
+            }
+
+            /**
+             * Returns the position of the first occurrence of a subarray.
+             * @param {Array<any>} array The array to search in
+             * @param {Array<any>} searchArray The subarray to search for in the array
+             * @param {number} position The index at which to begin searching the array. If omitted, search starts at the beginning of the array.
+             */
+            function indexOfSubArray(array, searchArray, position = 0) {
+                let start = array.indexOf(searchArray[0], position);
+                if (start == -1) return -1;
+
+                let i = 1;
+                while (i < searchArray.length) {
+                    if (array[start + i] !== searchArray[i]) {
+                        start = array.indexOf(searchArray[0], start + 1);
+                        i = 0;
+                        if (start == -1) {
+                            return -1;
+                        }
+                    }
+                    i++;
+                }
+                return start;
+            }
+
+            /**
+             * Combines two or more arrays.
+             * This method returns a new array without modifying any existing arrays.
+             * @param {Array<Uint8Array>} items Arrays to combine.
+             */
+            function uint8ArrayConcat(...items) {
+                var len = items.reduce((n, a) => n + a.byteLength, 0);
+                var result = new Uint8Array(len);
+                var pos = 0;
+                for (var i = 0; i < items.length; i++) {
+                    result.set(items[i], pos);
+                    pos += items[i].byteLength;
+                }
+                return result;
+            }
+
+            /**
+             * Creates PNG gAMA chunk.
+             * @param {number} gama 
+             * @returns 
+             */
+            function createPngGama(gama) {
+                let crc32 = function (r) {
+                    let o = [];
+                    for (let a, c = 0; c < 256; c++) {
+                        a = c; for (let f = 0; f < 8; f++)a = 1 & a ? 3988292384 ^ a >>> 1 : a >>> 1; o[c] = a
+                    }
+                    let n = -1;
+                    for (let t = 0; t < r.length; t++) n = n >>> 8 ^ o[255 & (n ^ r[t])];
+                    return (-1 ^ n) >>> 0
+                };
+                let length = 4;
+                let gamaHex = gama.toString(16).padStart(8, '0');
+                let gamaArr = uint8ArrayConcat(stringToUint8Array("gAMA"), hexToUint8Array(gamaHex));
+                let crcHex = crc32(gamaArr).toString(16).padStart(8, '0');
+                let lengthHex = length.toString(16).padStart(8, 0);
+                return uint8ArrayConcat(hexToUint8Array(lengthHex), gamaArr, hexToUint8Array(crcHex));
+            }
+
+            /**
+             * Converts string to Uint8Array.
+             * @param {string} string 
+             * @returns {Uint8Array}
+             */
+            function stringToUint8Array(string) {
+                let array = new Uint8Array(string.length);
+                for (var i = 0; i < string.length; i++) {
+                    array[i] = string.charCodeAt(i);
+                }
+                return array;
+            }
+
+            /**
+             * Converts hex string to Uint8Array.
+             * @param {string} hexString 
+             * @returns {Uint8Array}
+             */
+            function hexToUint8Array(hexString) {
+                const len = hexString.length / 2;
+                const res = new Uint8Array(len);
+                for (let i = 0; i < len; i++) {
+                    const byte = parseInt(hexString.substr(i * 2, 2), 16);
+                    res[i] = byte;
+                }
+                return res;
+            }
+        }
+
+    </script>
+</body>
+
+</html>
