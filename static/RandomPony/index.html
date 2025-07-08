@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Pony</title>
+    <link rel="stylesheet" href="/RandomPony/pony.css">
+</head>
+
+<body>
+    <h1>Random Pony</h1>
+
+    <!-- List Type Filter -->
+    <form id="list-type-filter">
+        <fieldset>
+            <legend>Include Lists</legend>
+            <label>
+                <input type="checkbox" name="listType" value="earth" checked>
+                Earth
+            </label>
+            <label>
+                <input type="checkbox" name="listType" value="pegasi" checked>
+                Pegasi
+            </label>
+            <label>
+                <input type="checkbox" name="listType" value="unicorns" checked>
+                Unicorns
+            </label>
+            <label>
+                <input type="checkbox" name="listType" value="alicorns" checked>
+                Alicorns
+            </label>
+            <label>
+                <input type="checkbox" name="listType" value="crystal" checked>
+                Crystal
+            </label>
+            <label>
+                <input type="checkbox" name="listType" value="kirin" checked>
+                Kirin
+            </label>
+            <label>
+                <input type="checkbox" name="listType" value="foal" checked>
+                Foal
+            </label>
+            <label>
+                <input type="checkbox" name="listType" value="wonderbolts" checked>
+                Wonderbolts
+            </label>
+        </fieldset>
+    </form>
+
+    <!-- Group Filter -->
+    <form id="group-filter">
+        <fieldset>
+            <legend>Include Groups</legend>
+            <label>
+                <input type="checkbox" name="group" value="mare" checked>
+                Mare
+            </label>
+            <label>
+                <input type="checkbox" name="group" value="stallion" checked>
+                Stallion
+            </label>
+            <label>
+                <input type="checkbox" name="group" value="colt" checked>
+                Colt
+            </label>
+            <label>
+                <input type="checkbox" name="group" value="filly" checked>
+                Filly
+            </label>
+        </fieldset>
+    </form>
+
+    <!-- Kind Filter -->
+    <form id="kind-filter">
+        <fieldset>
+            <legend>Include Kind</legend>
+            <label>
+                <input type="checkbox" name="kind" value="earth" checked>
+                Earth
+            </label>
+            <label>
+                <input type="checkbox" name="kind" value="pegasus" checked>
+                Pegasus
+            </label>
+            <label>
+                <input type="checkbox" name="kind" value="unicorn" checked>
+                Unicorn
+            </label>
+            <label>
+                <input type="checkbox" name="kind" value="Alicorn" checked>
+                Alicorn
+            </label>
+            <label>
+                <input type="checkbox" name="kind" value="Kirin" checked>
+                Kirin
+            </label>
+        </fieldset>
+    </form>
+
+    <div id="pony-container"></div>
+    <button id="new-pony">Get New Pony</button>
+    <script src="/RandomPony/pony.js"></script>
+</body>
+
+</html>
