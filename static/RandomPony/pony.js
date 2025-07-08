@@ -38,7 +38,7 @@
  * @returns {Promise<PonyInfo[]>}
  */
 async function getPonies() {
-    const response = await fetch('/ponies.json');
+    const response = await fetch('/RandomPony/ponies.json');
     if (!response.ok) {
         throw new Error(`Failed to fetch ponies: ${response.statusText}`);
     }
