@@ -82,6 +82,12 @@ const DEFAULT_FILTERS = {
     kind: ['earth', 'pegasus', 'unicorn', 'Alicorn', 'Kirin'],
 };
 
+const ALL_FILTERS = {
+    listType: ['earth', 'pegasi', 'unicorns', 'alicorns', 'crystal', 'kirin', 'foal', 'wonderbolts'],
+    group: ['mare', 'stallion', 'colt', 'filly'],
+    kind: ['earth', 'pegasus', 'unicorn', 'Alicorn', 'Kirin'],
+};
+
 /**
  * @template {keyof typeof DEFAULT_FILTERS} T
  * Gets the default values for a filter.
@@ -159,6 +165,24 @@ function loadSelected(name) {
     }
 }
 
+let filteredCache = new Map();
+
+/**
+ * Generates a cache key based on the selected filters.
+ * @param {{ listType: ListType[], group: Group[], kind: Kind[] }} selected
+ * @returns {number}
+ */
+function getCacheKey(selected) {
+    let key = 0;
+    for (const filter in ALL_FILTERS) {
+        const values = selected[filter] || [];
+        for (const value of ALL_FILTERS[filter]) {
+            key = (key << 1) | (values.includes(value) ? 1 : 0);
+        }
+    }
+    return key;
+}
+
 /**
  * Filters ponies based on the selected filters.
  * @param {PonyInfo[]} ponies
@@ -166,10 +190,16 @@ function loadSelected(name) {
  * @returns {PonyInfo[]}
  */
 function filterPonies(ponies, selected) {
-    if (Object.values(selected).some(value => value.length === 0)) {
-        return [];
+    let cacheKey = getCacheKey(selected);
+    let cachedPonies = filteredCache.get(cacheKey);
+    if (cachedPonies) {
+        return cachedPonies;
     }
-    return ponies.filter(pony => {
+    if (Object.values(selected).some(value => value.length === 0)) {
+        filteredCache.set(cacheKey, cachedPonies = []);
+        return cachedPonies;
+    }
+    cachedPonies = ponies.filter(pony => {
         const ponyListType = pony.type;
         const ponyGroup = pony.group;
         const ponyKind = pony.kind;
@@ -186,6 +216,8 @@ function filterPonies(ponies, selected) {
         }
         return passed;
     });
+    filteredCache.set(cacheKey, cachedPonies);
+    return cachedPonies;
 }
 
 const IMAGE_REGEX = /^(https:\/\/static\.wikia\.nocookie\.net\/.+)\/revision\/latest(?:\/scale-to-width-down\/\d+)?\?cb=\d+$/;
