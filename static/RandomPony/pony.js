@@ -235,8 +235,16 @@ function getCleanImageLink(image) {
 function fixLinks(element, currentList) {
     element.querySelectorAll('a').forEach(link => {
         if (!(link instanceof HTMLAnchorElement)) return;
-        const href = link.getAttribute('href');
+        let href = link.getAttribute('href');
         if (!href) return;
+        // https://mlp.fandom.com/wiki/List_of_ponies#Luminous_Dazzle
+        // or just /wiki/List_of_ponies#Luminous_Dazzle
+        const match = href.match(/^(?:https?:\/\/mlp\.fandom\.com)?\/wiki\/List_of_ponies(#[\w-]+)$/);
+        if (match) {
+            href = match[1];
+            link.setAttribute('href', href);
+        }
+
         if (href.startsWith('http://') || href.startsWith('https://')) {
             return;
         }
@@ -245,7 +253,7 @@ function fixLinks(element, currentList) {
         }
         if (href.startsWith('#')) {
             link.addEventListener('click', (event) => {
-                // On mlp wiki this will just sctoll to the appropriate pony in the table,
+                // On mlp wiki this will just scroll to the appropriate pony in the table,
                 // But since we don't have the table, we should load and show the pony by their ID instead.
                 event.preventDefault();
                 const ponyId = href.slice(1);
@@ -271,8 +279,116 @@ function fixLinks(element, currentList) {
                     alert(`Pony with ID '${ponyId}' not found.`);
                 }
             });
+        } else {
+            link.setAttribute('href', `https://mlp.fandom.com${href}`);
         }
-        link.setAttribute('href', `https://mlp.fandom.com${href}`);
+    });
+}
+
+/**
+ * Creates a paragraph element for a pony's color information.
+ * @param {ColorInfo} colorInfo
+ * @param {string} colorText
+ * @returns {HTMLParagraphElement}
+ */
+function createColorP(colorInfo, colorText) {
+    const coatP = document.createElement('p');
+    const coatStrong = document.createElement('strong');
+    coatStrong.textContent = colorText;
+    coatP.appendChild(coatStrong);
+    const coatSpan = document.createElement('span');
+    coatSpan.className = 'color';
+    if (colorInfo.color) {
+        coatSpan.style.backgroundColor = colorInfo.color;
+    }
+    // if (colorInfo.fgColor) {
+    //     coatSpan.style.color = colorInfo.fgColor;
+    // }
+    if (colorInfo.name) {
+        coatSpan.title = colorInfo.name;
+    }
+    coatSpan.textContent = '¤';
+    coatP.appendChild(coatSpan);
+    return coatP
+}
+
+/**
+ * Calculates the relative luminance of a color
+ * @param {number} r - Red component (0-255)
+ * @param {number} g - Green component (0-255)
+ * @param {number} b - Blue component (0-255)
+ * @returns {number} Relative luminance (0-1)
+ */
+function getLuminance(r, g, b) {
+    const [rs, gs, bs] = [r, g, b].map(c => {
+        c = c / 255;
+        return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+    });
+    return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
+}
+
+/**
+ * Determines if white or black text should be used on a given background color
+ * @param {number} r - Red component (0-255)
+ * @param {number} g - Green component (0-255)
+ * @param {number} b - Blue component (0-255)
+ * @returns {string} Either '#ffffff' or '#000000'
+ */
+function getContrastColor(r, g, b) {
+    const luminance = getLuminance(r, g, b);
+    return luminance > 0.5 ? '#000000' : '#ffffff';
+}
+
+/**
+ * Populates the color paragraph with computed colors if available.
+ * @param {HTMLParagraphElement | null} colorP
+ * @returns {void}
+ */
+function pupulateWithComputedColors(colorP) {
+    if (!colorP) return;
+    const colorSpan = colorP.querySelector('.color');
+    if (!colorSpan || !(colorSpan instanceof HTMLSpanElement)) {
+        return;
+    }
+    const computedStyle = getComputedStyle(colorSpan);
+    if (computedStyle.backgroundColor === 'rgba(0, 0, 0, 0)') {
+        return;
+    }
+    const match = computedStyle.backgroundColor.match(/(?:rgb\((\d{1,3}, \d{1,3}, \d{1,3})\)|rgba\((\d{1,3}, \d{1,3}, \d{1,3}, [01](?:\.\d+)?)\))/);
+    if (!match) {
+        console.warn('Could not parse color from computed style:', computedStyle.backgroundColor);
+        return;
+    }
+    const [r, g, b] = (match[1] || match[2]).split(',').map(Number);
+    const hexColor = `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).padStart(6, '0')}`;
+    const textColor = getContrastColor(r, g, b);
+    colorSpan.style.color = textColor;
+    colorSpan.textContent = hexColor;
+    let animationTimeout;
+    colorSpan.addEventListener('click', () => {
+        // Copy the hex color to clipboard
+        navigator.clipboard.writeText(hexColor).then(() => {
+            if (animationTimeout) {
+                clearTimeout(animationTimeout);
+            }
+            colorSpan.classList.remove('error');
+            colorSpan.classList.add('copied');
+            animationTimeout = setTimeout(() => {
+                colorSpan.classList.remove('copied');
+                animationTimeout = null;
+            }, 2000);
+        }).catch(err => {
+            console.error('Failed to copy color:', err);
+            if (animationTimeout) {
+                clearTimeout(animationTimeout);
+            }
+            colorSpan.classList.remove('copied');
+            colorSpan.classList.add('error');
+            animationTimeout = setTimeout(() => {
+                colorSpan.classList.remove('error');
+                animationTimeout = null;
+            }, 2000);
+        });
     });
 }
 
@@ -319,50 +435,20 @@ function showPony(pony) {
     groupP.appendChild(groupStrong);
     groupP.appendChild(document.createTextNode(` ${pony.group || 'Unknown'}`));
     contentDiv.appendChild(groupP);
+    /** @type {HTMLParagraphElement | null} */
+    let coatColorP = null;
     if (pony.coat) {
-        const coatP = document.createElement('p');
-        const coatStrong = document.createElement('strong');
-        coatStrong.textContent = 'Coat Color:';
-        coatP.appendChild(coatStrong);
-        const coatSpan = document.createElement('span');
-        coatSpan.className = 'color';
-        coatSpan.style.backgroundColor = pony.coat.color || 'transparent';
-        if (pony.coat.fgColor) {
-            coatSpan.style.color = pony.coat.fgColor;
-        }
-        coatSpan.textContent = pony.coat.name || 'Unknown';
-        coatP.appendChild(coatSpan);
-        contentDiv.appendChild(coatP);
+        contentDiv.appendChild(coatColorP = createColorP(pony.coat, 'Coat Color:'));
     }
+    /** @type {HTMLParagraphElement | null} */
+    let maneColorP = null;
     if (pony.mane) {
-        const maneP = document.createElement('p');
-        const maneStrong = document.createElement('strong');
-        maneStrong.textContent = 'Mane Color:';
-        maneP.appendChild(maneStrong);
-        const maneSpan = document.createElement('span');
-        maneSpan.className = 'color';
-        maneSpan.style.backgroundColor = pony.mane.color || 'transparent';
-        if (pony.mane.fgColor) {
-            maneSpan.style.color = pony.mane.fgColor;
-        }
-        maneSpan.textContent = pony.mane.name || 'Unknown';
-        maneP.appendChild(maneSpan);
-        contentDiv.appendChild(maneP);
+        contentDiv.appendChild(maneColorP = createColorP(pony.mane, 'Mane Color:'));
     }
+    /** @type {HTMLParagraphElement | null} */
+    let eyesColorP = null;
     if (pony.eyes) {
-        const eyesP = document.createElement('p');
-        const eyesStrong = document.createElement('strong');
-        eyesStrong.textContent = 'Eye Color:';
-        eyesP.appendChild(eyesStrong);
-        const eyesSpan = document.createElement('span');
-        eyesSpan.className = 'color';
-        eyesSpan.style.backgroundColor = pony.eyes.color || 'transparent';
-        if (pony.eyes.fgColor) {
-            eyesSpan.style.color = pony.eyes.fgColor;
-        }
-        eyesSpan.textContent = pony.eyes.name || 'Unknown';
-        eyesP.appendChild(eyesSpan);
-        contentDiv.appendChild(eyesP);
+        contentDiv.appendChild(eyesColorP = createColorP(pony.eyes, 'Eyes Color:'));
     }
     if (pony.firstAppearance) {
         const firstAppearanceP = document.createElement('p');
@@ -382,35 +468,44 @@ function showPony(pony) {
     descriptionP.innerHTML = pony.description || 'No description available.';
     fixLinks(descriptionP, pony.type);
     contentDiv.appendChild(descriptionP);
-    const details = document.createElement('details');
-    const summary = document.createElement('summary');
-    summary.textContent = 'More Info';
-    details.appendChild(summary);
-    const idsP = document.createElement('p');
-    const idsStrong = document.createElement('strong');
-    idsStrong.textContent = 'IDs:';
-    idsP.appendChild(idsStrong);
-    idsP.appendChild(document.createTextNode(` ${pony.name.ids.join(', ')}`));
-    details.appendChild(idsP);
-    const galleryP = document.createElement('p');
-    const galleryStrong = document.createElement('strong');
-    galleryStrong.textContent = 'Gallery:';
-    galleryP.appendChild(galleryStrong);
-    const galleryList = document.createElement('ul');
-    pony.images.forEach(image => {
-        const listItem = document.createElement('li');
-        const img = document.createElement('img');
-        img.src = getCleanImageLink(image);
-        img.loading = 'lazy';
-        listItem.appendChild(img);
-        galleryList.appendChild(listItem);
-    });
-    galleryP.appendChild(galleryList);
-    details.appendChild(galleryP);
-    contentDiv.appendChild(details);
+    if (pony.name.ids.length > 0 || pony.images.length > 0) {
+        const details = document.createElement('details');
+        const summary = document.createElement('summary');
+        summary.textContent = 'More Info';
+        details.appendChild(summary);
+        if (pony.name.ids.length > 0) {
+            const idsP = document.createElement('p');
+            const idsStrong = document.createElement('strong');
+            idsStrong.textContent = 'IDs:';
+            idsP.appendChild(idsStrong);
+            idsP.appendChild(document.createTextNode(` ${pony.name.ids.join(', ')}`));
+            details.appendChild(idsP);
+        }
+        if (pony.images.length > 0) {
+            const galleryP = document.createElement('p');
+            const galleryStrong = document.createElement('strong');
+            galleryStrong.textContent = 'Gallery:';
+            galleryP.appendChild(galleryStrong);
+            const galleryList = document.createElement('ul');
+            pony.images.forEach(image => {
+                const listItem = document.createElement('li');
+                const img = document.createElement('img');
+                img.src = getCleanImageLink(image);
+                img.loading = 'lazy';
+                listItem.appendChild(img);
+                galleryList.appendChild(listItem);
+            });
+            galleryP.appendChild(galleryList);
+            details.appendChild(galleryP);
+        }
+        contentDiv.appendChild(details);
+    }
     ponyElement.appendChild(contentDiv);
     ponyContainer.innerHTML = '';
     ponyContainer.appendChild(ponyElement);
+    pupulateWithComputedColors(coatColorP);
+    pupulateWithComputedColors(maneColorP);
+    pupulateWithComputedColors(eyesColorP);
 }
 
 /**

@@ -5,7 +5,7 @@
     --card-bg: #ffffff;
     --text: #333333;
     --border: #e0e0e0;
-    --shadow: rgba(0, 0, 0, 0.1);
+    --shadow: rgba(0, 0, 0, 0.3);
 }
 
 * {
@@ -68,25 +68,22 @@ input[type="checkbox"] {
 }
 
 .pony {
-    display: flex;
-    flex-direction: row;
-    align-items: flex-start;
-    gap: 24px;
+    display: block;
+    width: 100%;
+    min-width: 0;
 }
 
 .pony img {
+    float: left;
     max-width: 220px;
     max-height: 300px;
     border-radius: 8px;
-    margin-bottom: 0;
+    margin: 0 20px 8px 0;
     box-shadow: 0 4px 8px var(--shadow);
     flex-shrink: 0;
 }
 
 .pony-content {
-    flex: 1 1 0;
-    display: flex;
-    flex-direction: column;
     min-width: 0;
 }
 
@@ -99,19 +96,6 @@ input[type="checkbox"] {
 .pony-content p {
     margin-bottom: 10px;
     width: 100%;
-}
-
-.color {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 4px;
-    margin-left: 5px;
-    font-weight: 500;
-    text-shadow:
-        0 0 2px #fff,
-        0 0 2px #fff,
-        1px 1px 2px #fff,
-        -1px -1px 2px #fff;
 }
 
 .first-appearance {
@@ -202,14 +186,12 @@ details img {
         padding: 10px;
     }
 
-    .pony {
-        flex-direction: column;
-        gap: 0;
-    }
-
     .pony img {
+        float: none;
+        display: block;
+        margin: 0 auto 15px auto;
         max-width: 100%;
-        margin-bottom: 15px;
+        height: auto;
     }
 
     .pony-content h2 {
@@ -218,5 +200,113 @@ details img {
 
     details li {
         flex: 0 0 calc(50% - 10px);
+    }
+}
+
+
+.color {
+    display: inline-block;
+    min-width: 5.5em;
+    height: 2em;
+    margin-left: 8px;
+    border-radius: 6px;
+    border: 1.5px solid var(--border);
+    vertical-align: middle;
+    text-align: center;
+    line-height: 2em;
+    font-family: monospace;
+    font-size: 1.1em;
+    background-color: #eee;
+    color: #333;
+    cursor: pointer;
+    transition: box-shadow 0.2s, border-color 0.2s, background-color 0.2s,
+        color 0.2s;
+    box-shadow: 0 1px 3px var(--shadow);
+    user-select: all;
+    padding: 0 0.5em;
+    box-sizing: border-box;
+    white-space: nowrap;
+    position: relative;
+}
+
+.color:hover {
+    border-color: var(--primary);
+    box-shadow: 0 2px 8px var(--shadow);
+}
+
+.color.copied::before,
+.color.error::before {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.9em;
+}
+
+.color.copied::before {
+    content: "COPIED";
+    background-color: #c8e6c9;
+    color: #256029;
+    border: 1.5px solid #388e3c;
+    box-shadow: 0 0 8px #388e3c55;
+    animation: color-copied-fade 2s ease-out;
+}
+
+.color.error::before {
+    content: "ERROR";
+    background-color: #ffcdd2;
+    color: #b71c1c;
+    border: 1.5px solid #b71c1c;
+    box-shadow: 0 0 8px #b71c1c55;
+    animation: color-error-shake 0.3s;
+}
+
+@keyframes color-copied-fade {
+    0% {
+        opacity: 0;
+    }
+
+    5% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+    }
+}
+
+@keyframes color-error-shake {
+    0% {
+        transform: translateX(0);
+    }
+
+    20% {
+        transform: translateX(-3px);
+    }
+
+    40% {
+        transform: translateX(3px);
+    }
+
+    60% {
+        transform: translateX(-2px);
+    }
+
+    80% {
+        transform: translateX(2px);
+    }
+
+    100% {
+        transform: translateX(0);
     }
 }
