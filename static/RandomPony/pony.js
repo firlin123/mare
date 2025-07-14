@@ -76,6 +76,9 @@ const FILTER_KEYS = {
     kind: 'selectedKinds',
 };
 
+const FILTERED_PONIES_KEY = 'filteredPonies';
+const IDS_LEFT_KEY = 'idsLeft';
+
 const ALL_FILTERS = {
     listType: ['earth', 'pegasi', 'unicorns', 'alicorns', 'crystal', 'kirin', 'foal', 'wonderbolts'],
     group: ['mare', 'stallion', 'colt', 'filly'],
@@ -165,6 +168,7 @@ function loadSelected(name) {
     }
 }
 
+/** @type {Map<number, number[]>} */
 let filteredCache = new Map();
 
 /**
@@ -187,7 +191,7 @@ function getCacheKey(selected) {
  * Filters ponies based on the selected filters.
  * @param {PonyInfo[]} ponies
  * @param {{ listType: ListType[], group: Group[], kind: Kind[] }} selected
- * @returns {PonyInfo[]}
+ * @returns {number[]}
  */
 function filterPonies(ponies, selected) {
     let cacheKey = getCacheKey(selected);
@@ -199,7 +203,9 @@ function filterPonies(ponies, selected) {
         filteredCache.set(cacheKey, cachedPonies = []);
         return cachedPonies;
     }
-    cachedPonies = ponies.filter(pony => {
+    cachedPonies = [];
+    for (let id = 0; id < ponies.length; id++) {
+        const pony = ponies[id];
         const ponyListType = pony.type;
         const ponyGroup = pony.group;
         const ponyKind = pony.kind;
@@ -214,8 +220,11 @@ function filterPonies(ponies, selected) {
         if (ponyKind && !selected.kind.includes(ponyKind)) {
             passed = false;
         }
-        return passed;
-    });
+        if (passed) {
+            cachedPonies.push(id);
+        }
+    }
+
     filteredCache.set(cacheKey, cachedPonies);
     return cachedPonies;
 }
@@ -577,16 +586,24 @@ let ponies = [];
 
 (async () => {
     ponies = await getPonies();
-    /** @type {PonyInfo[]} */
-    let filteredPonies = [];
-    let idsLeft = [];
+    /** @type {number[]} */
+    let filteredPonies = JSON.parse(localStorage.getItem(FILTERED_PONIES_KEY) || '[]');
+    /** @type {number[]} */
+    let idsLeft = JSON.parse(localStorage.getItem(IDS_LEFT_KEY) || '[]');
 
     /** @type {Promise<{ id: number, delay: number }[]>} */
     let preparedSequence = Promise.resolve([]);
     /** @type {Map<string, HTMLImageElement | 'error'>} */
     let preparedImages = new Map();
 
+    /**
+     * Prepares a sequence of ponies to be shown.
+     * @returns {Promise<{ id: number, delay: number }[]>}
+     */
     async function prepareSequence() {
+        if (idsLeft.length === 0) {
+            return [];
+        }
         const sequence = [];
         const promises = [];
         const curveClicks = Math.floor(Math.random() * (CURVE_CLICKS_MAX - CURVE_CLICKS_MIN + 1) + CURVE_CLICKS_MIN);
@@ -594,7 +611,7 @@ let ponies = [];
             const delayT = CURVE_FN(i / curveClicks);
             const delay = Math.round(CURVE_MIN_MS + (CURVE_MAX_MS - CURVE_MIN_MS) * delayT)
             const id = idsLeft[Math.floor(Math.random() * idsLeft.length)];
-            const pony = filteredPonies[id];
+            const pony = ponies[id];
             const mainImg = getMainImage(pony.images);
             sequence.push({ id, delay });
             if (!mainImg) {
@@ -651,7 +668,7 @@ let ponies = [];
 
         for (const { id, delay } of sequence) {
             imageOrTextContainer.innerHTML = '';
-            const pony = filteredPonies[id];
+            const pony = ponies[id];
             /** @type {HTMLImageElement | null} */
             let mainImg = null;
             const mainImgLink = getMainImage(pony.images);
@@ -675,10 +692,12 @@ let ponies = [];
         newPonyButton.innerHTML = 'Get New Pony';
         const randomIndexIndex = Math.floor(Math.random() * idsLeft.length);
         const [randomIndex] = idsLeft.splice(randomIndexIndex, 1);
-        const randomPony = filteredPonies[randomIndex];
+        localStorage.setItem(IDS_LEFT_KEY, JSON.stringify(idsLeft));
+        const randomPony = ponies[randomIndex];
         if (idsLeft.length === 0) {
             console.log('All ponies shown, resetting idsLeft.');
-            idsLeft = filteredPonies.map((_, index) => index);
+            idsLeft = filteredPonies.slice();
+            localStorage.setItem(IDS_LEFT_KEY, JSON.stringify(idsLeft));
         }
         showPonyWithHistory(randomPony, true, true);
         preparedSequence = prepareSequence();
@@ -686,7 +705,7 @@ let ponies = [];
 
     /**
      * @template {keyof typeof FILTER_KEYS} T
-     * Updates the filteredPonies array and shows a random pony.
+     * Updates the filter based on the selected values.
      * @param {T} name
      */
     function updateFilter(name) {
@@ -698,7 +717,9 @@ let ponies = [];
         const selectedValues = /** @type {any} */ (selected[name]);
         saveSelected(name, selectedValues);
         filteredPonies = filterPonies(ponies, selected);
-        idsLeft = filteredPonies.map((_, index) => index);
+        localStorage.setItem(FILTERED_PONIES_KEY, JSON.stringify(filteredPonies));
+        idsLeft = filteredPonies.slice();
+        localStorage.setItem(IDS_LEFT_KEY, JSON.stringify(idsLeft));
     }
 
     for (const name of Object.keys(FILTER_KEYS)) {
@@ -716,19 +737,34 @@ let ponies = [];
         group: getSelected(filterForms.group, 'group'),
         kind: getSelected(filterForms.kind, 'kind'),
     };
-    filteredPonies = filterPonies(ponies, initialSelected);
-    idsLeft = filteredPonies.map((_, index) => index);
-    if (idsLeft.length !== 0) {
-        preparedSequence = prepareSequence();
+    if (filteredPonies.length === 0) {
+        filteredPonies = filterPonies(ponies, initialSelected);
+        localStorage.setItem(FILTERED_PONIES_KEY, JSON.stringify(filteredPonies));
+        idsLeft = filteredPonies.slice();
+        localStorage.setItem(IDS_LEFT_KEY, JSON.stringify(idsLeft));
     }
+    if (idsLeft.length === 0) {
+        idsLeft = filteredPonies.slice();
+        localStorage.setItem(IDS_LEFT_KEY, JSON.stringify(idsLeft));
+    }
+    preparedSequence = prepareSequence();
 
-    const hashPonyId = window.location.hash.slice(1);
+    const hashPonyId = decodeURIComponent(window.location.hash.slice(1));
     let foundPony = null;
     if (hashPonyId) {
-        for (const pony of ponies) {
+        for (const id of filteredPonies) {
+            const pony = ponies[id];
             if (pony.name.ids.includes(hashPonyId)) {
                 foundPony = pony;
                 break;
+            }
+        }
+        if (!foundPony) {
+            for (const pony of ponies) {
+                if (pony.name.ids.includes(hashPonyId)) {
+                    foundPony = pony;
+                    break;
+                }
             }
         }
     }
@@ -750,7 +786,8 @@ let ponies = [];
         const hashPonyId = window.location.hash.slice(1);
         if (hashPonyId) {
             let foundPony = null;
-            for (const pony of filteredPonies) {
+            for (const id of filteredPonies) {
+                const pony = ponies[id];
                 if (pony.name.ids.includes(hashPonyId)) {
                     foundPony = pony;
                     break;
