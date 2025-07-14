@@ -548,8 +548,20 @@ function showPony(pony) {
  */
 function showPonyWithHistory(pony, pushState = false, replaceState = false) {
     showPony(pony);
+    const ponyId = pony?.name?.ids?.[0] || '';
+    const newUrl = new URL(window.location.href);
+    if (ponyId) {
+        newUrl.hash = `#${encodeURIComponent(ponyId)}`;
+    } else {
+        newUrl.hash = '';
+    }
     if (pushState) {
-        history.pushState({ pony: pony }, '', '');
+        if (replaceState) {
+            history.replaceState({ pony: pony }, '', newUrl.toString());
+        }
+        else {
+            history.pushState({ pony: pony }, '', newUrl.toString());
+        }
     }
 }
 
@@ -608,11 +620,52 @@ let ponies = [];
         kind: getSelected(filterForms.kind, 'kind'),
     };
     filteredPonies = filterPonies(ponies, initialSelected);
-    showRandomPony();
+
+    const hashPonyId = window.location.hash.slice(1);
+    let foundPony = null;
+    if (hashPonyId) {
+        for (const pony of ponies) {
+            if (pony.name.ids.includes(hashPonyId)) {
+                foundPony = pony;
+                break;
+            }
+        }
+    }
+    if (foundPony) {
+        showPonyWithHistory(foundPony, true, true);
+    } else {
+        showRandomPony();
+    }
 
     window.addEventListener('popstate', (event) => {
         if (event.state && event.state.pony) {
             showPonyWithHistory(event.state.pony, false);
+        }
+    });
+
+    window.addEventListener('hashchange', () => {
+        const hashPonyId = window.location.hash.slice(1);
+        if (hashPonyId) {
+            let foundPony = null;
+            for (const pony of filteredPonies) {
+                if (pony.name.ids.includes(hashPonyId)) {
+                    foundPony = pony;
+                    break;
+                }
+            }
+            if (foundPony) {
+                return showPonyWithHistory(foundPony, false);
+            }
+            for (const pony of ponies) {
+                if (pony.name.ids.includes(hashPonyId)) {
+                    foundPony = pony;
+                    break;
+                }
+            }
+            if (foundPony) {
+                return showPonyWithHistory(foundPony, false);
+            }
+            ponyContainer.innerHTML = `<p>Pony with ID '${hashPonyId}' not found.</p>`;
         }
     });
 })().catch(error => {
