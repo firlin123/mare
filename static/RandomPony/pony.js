@@ -76,16 +76,16 @@ const FILTER_KEYS = {
     kind: 'selectedKinds',
 };
 
-const DEFAULT_FILTERS = {
-    listType: ['earth', 'pegasi', 'unicorns', 'alicorns', /*'crystal', 'kirin', 'foal', 'wonderbolts'*/],
-    group: ['mare', /*'stallion', 'colt', 'filly'*/],
-    kind: ['earth', 'pegasus', 'unicorn', 'Alicorn', 'Kirin'],
-};
-
 const ALL_FILTERS = {
     listType: ['earth', 'pegasi', 'unicorns', 'alicorns', 'crystal', 'kirin', 'foal', 'wonderbolts'],
     group: ['mare', 'stallion', 'colt', 'filly'],
     kind: ['earth', 'pegasus', 'unicorn', 'Alicorn', 'Kirin'],
+};
+
+const DEFAULT_FILTERS = {
+    listType: getSelected(filterForms.listType, 'listType'),
+    group: getSelected(filterForms.group, 'group'),
+    kind: getSelected(filterForms.kind, 'kind'),
 };
 
 /**
