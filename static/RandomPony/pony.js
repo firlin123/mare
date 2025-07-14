@@ -572,19 +572,106 @@ let ponies = [];
     ponies = await getPonies();
     /** @type {PonyInfo[]} */
     let filteredPonies = [];
+    let idsLeft = [];
+
+    /** @type {Promise<{ id: number, delay: number }[]>} */
+    let preparedSequence = Promise.resolve([]);
+    /** @type {Map<string, HTMLImageElement | 'error'>} */
+    let preparedImages = new Map();
+
+    async function prepareSequence() {
+        const sequence = [];
+        const promises = [];
+        for (let i = 42; i >= 0; i--) {
+            const delay = Math.max(100, 500 - i * 10);
+            const id = idsLeft[Math.floor(Math.random() * idsLeft.length)];
+            const pony = filteredPonies[id];
+            const mainImg = getMainImage(pony.images);
+            sequence.push({ id, delay });
+            if (!mainImg) {
+                continue;
+            }
+            if (preparedImages.has(mainImg)) {
+                continue;
+            }
+            promises.push(new Promise(resolve => {
+                const img = new Image();
+                img.src = mainImg;
+                img.onload = () => {
+                    preparedImages.set(mainImg, img);
+                    resolve(void 0);
+                };
+                img.onerror = () => {
+                    preparedImages.set(mainImg, 'error');
+                    resolve(void 0);
+                };
+            }));
+        }
+        await Promise.all(promises);
+        return sequence;
+    }
 
     /**
-     * Shows a random pony from the filtered list.
+     * Plays a pony roll animation and shows a pony.
      */
-    function showRandomPony() {
+    async function playRandomPonyRollAnimation() {
+        if (ponyContainer.classList.contains('rolling') || newPonyButton.disabled) {
+            return;
+        }
         if (filteredPonies.length === 0) {
+            ponyContainer.style.display = '';
             ponyContainer.innerHTML =
                 '<p>No ponies found for the selected group(s).</p>';
             return;
         }
 
-        const randomIndex = Math.floor(Math.random() * filteredPonies.length);
-        showPonyWithHistory(filteredPonies[randomIndex], true, true);
+        ponyContainer.classList.add('rolling');
+        newPonyButton.disabled = true;
+        newPonyButton.innerHTML = 'Rolling...';
+        const sequence = await preparedSequence;
+        ponyContainer.style.display = '';
+        if (sequence.length === 0) {
+            ponyContainer.innerHTML = '<p>No ponies available for the current filters.</p>';
+            return;
+        }
+        const imageOrTextContainer = document.createElement('div');
+        imageOrTextContainer.className = 'image-or-text-container';
+        ponyContainer.innerHTML = '';
+        ponyContainer.appendChild(imageOrTextContainer);
+
+        for (const { id, delay } of sequence) {
+            imageOrTextContainer.innerHTML = '';
+            const pony = filteredPonies[id];
+            /** @type {HTMLImageElement | null} */
+            let mainImg = null;
+            const mainImgLink = getMainImage(pony.images);
+            if (mainImgLink) {
+                let img = preparedImages.get(mainImgLink);
+                if (img && img !== 'error') {
+                    mainImg = img;
+                }
+            }
+            if (mainImg) {
+                imageOrTextContainer.appendChild(mainImg);
+            } else {
+                const text = document.createElement('p');
+                text.innerHTML = pony.name.html;
+                imageOrTextContainer.appendChild(text);
+            }
+            await new Promise(resolve => setTimeout(resolve, delay));
+        }
+        ponyContainer.classList.remove('rolling');
+        newPonyButton.disabled = false;
+        newPonyButton.innerHTML = 'Get New Pony';
+        const randomIndexIndex = Math.floor(Math.random() * idsLeft.length);
+        const [randomIndex] = idsLeft.splice(randomIndexIndex, 1);
+        const randomPony = filteredPonies[randomIndex];
+        if (idsLeft.length === 0) {
+            console.log('All ponies shown, resetting idsLeft.');
+            idsLeft = filteredPonies.map((_, index) => index);
+        }
+        showPonyWithHistory(randomPony, true, true);
+        preparedSequence = prepareSequence();
     }
 
     /**
@@ -592,7 +679,7 @@ let ponies = [];
      * Updates the filteredPonies array and shows a random pony.
      * @param {T} name
      */
-    function updateFilterAndShow(name) {
+    function updateFilter(name) {
         const selected = {
             listType: getSelected(filterForms.listType, 'listType'),
             group: getSelected(filterForms.group, 'group'),
@@ -601,7 +688,7 @@ let ponies = [];
         const selectedValues = /** @type {any} */ (selected[name]);
         saveSelected(name, selectedValues);
         filteredPonies = filterPonies(ponies, selected);
-        showRandomPony();
+        idsLeft = filteredPonies.map((_, index) => index);
     }
 
     for (const name of Object.keys(FILTER_KEYS)) {
@@ -609,10 +696,10 @@ let ponies = [];
         const savedValues = /** @type {any} */ (loadSelected(key));
         setSelected(filterForms[key], key, savedValues);
 
-        filterForms[key].addEventListener('change', () => updateFilterAndShow(key));
+        filterForms[key].addEventListener('change', () => updateFilter(key));
     }
 
-    newPonyButton.addEventListener('click', showRandomPony);
+    newPonyButton.addEventListener('click', playRandomPonyRollAnimation);
 
     const initialSelected = {
         listType: getSelected(filterForms.listType, 'listType'),
@@ -620,6 +707,10 @@ let ponies = [];
         kind: getSelected(filterForms.kind, 'kind'),
     };
     filteredPonies = filterPonies(ponies, initialSelected);
+    idsLeft = filteredPonies.map((_, index) => index);
+    if (idsLeft.length !== 0) {
+        preparedSequence = prepareSequence();
+    }
 
     const hashPonyId = window.location.hash.slice(1);
     let foundPony = null;
@@ -634,7 +725,8 @@ let ponies = [];
     if (foundPony) {
         showPonyWithHistory(foundPony, true, true);
     } else {
-        showRandomPony();
+        ponyContainer.style.display = 'none';
+        ponyContainer.innerHTML = '';
     }
 
     window.addEventListener('popstate', (event) => {
@@ -644,6 +736,7 @@ let ponies = [];
     });
 
     window.addEventListener('hashchange', () => {
+        console.log('Hash changed:', window.location.hash);
         const hashPonyId = window.location.hash.slice(1);
         if (hashPonyId) {
             let foundPony = null;
