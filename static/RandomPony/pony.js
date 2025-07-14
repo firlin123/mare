@@ -565,6 +565,13 @@ function showPonyWithHistory(pony, pushState = false, replaceState = false) {
     }
 }
 
+/** @type {(t: number) => number} */
+const CURVE_FN = t => 1 - Math.pow(1 - t, 0.62);
+const CURVE_CLICKS_MIN = 45;
+const CURVE_CLICKS_MAX = 75;
+const CURVE_MIN_MS = 32;
+const CURVE_MAX_MS = 500;
+
 /** @type {PonyInfo[]} */
 let ponies = [];
 
@@ -582,8 +589,10 @@ let ponies = [];
     async function prepareSequence() {
         const sequence = [];
         const promises = [];
-        for (let i = 42; i >= 0; i--) {
-            const delay = Math.max(100, 500 - i * 10);
+        const curveClicks = Math.floor(Math.random() * (CURVE_CLICKS_MAX - CURVE_CLICKS_MIN + 1) + CURVE_CLICKS_MIN);
+        for (let i = 0; i < curveClicks; i++) {
+            const delayT = CURVE_FN(i / curveClicks);
+            const delay = Math.round(CURVE_MIN_MS + (CURVE_MAX_MS - CURVE_MIN_MS) * delayT)
             const id = idsLeft[Math.floor(Math.random() * idsLeft.length)];
             const pony = filteredPonies[id];
             const mainImg = getMainImage(pony.images);
@@ -608,6 +617,7 @@ let ponies = [];
             }));
         }
         await Promise.all(promises);
+        // console.log(`Prepared sequence: ${sequence.map((s, i) => `(${i}, ${s.delay})`).join(', ')}`);
         return sequence;
     }
 
