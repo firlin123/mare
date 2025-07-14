@@ -808,6 +808,29 @@ let ponies = [];
             ponyContainer.innerHTML = `<p>Pony with ID '${hashPonyId}' not found.</p>`;
         }
     });
+
+    window.addEventListener('storage', (event) => {
+        if (!event.key) {
+            return;
+        }
+        switch (event.key) {
+            case FILTERED_PONIES_KEY:
+                filteredPonies = JSON.parse(event.newValue || '[]');
+                break;
+            case IDS_LEFT_KEY:
+                idsLeft = JSON.parse(event.newValue || '[]');
+                break;
+            case FILTER_KEYS.listType:
+                setSelected(filterForms.listType, 'listType', loadSelected('listType'));
+                break;
+            case FILTER_KEYS.group:
+                setSelected(filterForms.group, 'group', loadSelected('group'));
+                break;
+            case FILTER_KEYS.kind:
+                setSelected(filterForms.kind, 'kind', loadSelected('kind'));
+                break;
+        }
+    });
 })().catch(error => {
     console.error('Error fetching ponies:', error);
     ponyContainer.innerHTML = `<p>Error loading ponies: ${error.message}</p>`;
