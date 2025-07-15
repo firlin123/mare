@@ -110,6 +110,24 @@
                 </label>
             </fieldset>
         </form>
+
+        <!-- Wheel Clicks Double Range Slider -->
+        <form id="wheel-clicks-form" autocomplete="off" style="margin-top: 10px;">
+            <fieldset>
+                <legend>Wheel Clicks (Roll Animation Length)</legend>
+                <div class="range-slider" style="width: 100%; max-width: 400px;">
+                    <div class="range-slider__track">
+                        <div class="range-slider__range" id="range-fill"></div>
+                    </div>
+                    <input type="range" id="range-min" min="0" max="200" value="45" step="1">
+                    <input type="range" id="range-max" min="0" max="200" value="75" step="1">
+                    <div class="range-values">
+                        <span>From: <span id="min-value">45</span></span>
+                        <span>To: <span id="max-value">75</span></span>
+                    </div>
+                </div>
+            </fieldset>
+        </form>
     </details>
 
     <details id="roll-history" style="display: none;">

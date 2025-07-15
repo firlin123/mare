@@ -73,6 +73,11 @@ const rollHistoryDetails = strictGetElementById('roll-history', HTMLDetailsEleme
 const rollHistoryUl = strictGetElementById('roll-history-ul', HTMLUListElement);
 const rollHistorySize = strictGetElementById('roll-history-size', HTMLSpanElement);
 const clearRollHistoryButton = strictGetElementById('clear-roll-history', HTMLButtonElement);
+const rangeMin = strictGetElementById('range-min', HTMLInputElement);
+const rangeMax = strictGetElementById('range-max', HTMLInputElement);
+const rangeFill = strictGetElementById('range-fill', HTMLDivElement);
+const minValue = strictGetElementById('min-value', HTMLSpanElement);
+const maxValue = strictGetElementById('max-value', HTMLSpanElement);
 
 const FILTER_KEYS = {
     listType: 'selectedListTypes',
@@ -82,6 +87,9 @@ const FILTER_KEYS = {
 
 const FILTERED_PONIES_KEY = 'filteredPonies';
 const ROLL_HIST_KEY = 'rollHistory';
+
+const WHEEL_CLICKS_MIN_KEY = 'wheelClicksMin';
+const WHEEL_CLICKS_MAX_KEY = 'wheelClicksMax';
 
 const ALL_FILTERS = {
     listType: ['earth', 'pegasi', 'unicorns', 'alicorns', 'crystal', 'kirin', 'foal', 'wonderbolts'],
@@ -94,6 +102,147 @@ const DEFAULT_FILTERS = {
     group: getSelected(filterForms.group, 'group'),
     kind: getSelected(filterForms.kind, 'kind'),
 };
+
+function updateSlider() {
+    let min = parseInt(rangeMin.value);
+    let max = parseInt(rangeMax.value);
+
+    // Prevent handles from crossing
+    if (min > max) {
+        min = max;
+        rangeMin.value = min.toString();
+    }
+
+    if (max < min) {
+        max = min;
+        rangeMax.value = max.toString();
+    }
+
+    const rangeMinMax = parseInt(rangeMin.max);
+    const rangeMaxMax = parseInt(rangeMax.max);
+
+    const minPercent = (min / rangeMinMax) * 100;
+    const maxPercent = (max / rangeMaxMax) * 100;
+
+    rangeFill.style.left = minPercent + '%';
+    rangeFill.style.width = (maxPercent - minPercent) + '%';
+
+    const newMinValue = min.toString();
+    const newMaxValue = max.toString();
+
+    minValue.textContent = newMinValue;
+    maxValue.textContent = newMaxValue;
+
+    const oldMinValue = localStorage.getItem(WHEEL_CLICKS_MIN_KEY);
+    const oldMaxValue = localStorage.getItem(WHEEL_CLICKS_MAX_KEY);
+
+    if (oldMinValue !== newMinValue) {
+        localStorage.setItem(WHEEL_CLICKS_MIN_KEY, newMinValue);
+    }
+    if (oldMaxValue !== newMaxValue) {
+        localStorage.setItem(WHEEL_CLICKS_MAX_KEY, newMaxValue);
+    }
+}
+
+rangeMin.addEventListener('input', function () {
+    const min = parseInt(this.value);
+    const max = parseInt(rangeMax.value);
+
+    if (min > max) {
+        this.value = max.toString();
+    }
+    updateSlider();
+});
+
+rangeMax.addEventListener('input', function () {
+    const min = parseInt(rangeMin.value);
+    const max = parseInt(this.value);
+
+    if (max < min) {
+        this.value = min.toString();
+    }
+    updateSlider();
+});
+
+const rangeTrack = rangeFill.parentElement;
+if (!(rangeTrack instanceof HTMLDivElement)) {
+    throw new Error('Expected rangeFill.parentElement to be an HTMLDivElement');
+}
+// Range track
+rangeTrack.addEventListener('click', (event) => {
+    const rect = rangeTrack.getBoundingClientRect();
+    const clickX = event.clientX - rect.left;
+    const percent = Math.min(Math.max(clickX / rect.width, 0), 1);
+
+    const sliderMin = parseInt(rangeMin.min, 10);
+    const sliderMax = parseInt(rangeMin.max, 10);
+
+    const value = Math.round(sliderMin + percent * (sliderMax - sliderMin));
+
+    const minValueNow = parseInt(rangeMin.value);
+    const maxValueNow = parseInt(rangeMax.value);
+
+    const distToMin = Math.abs(value - minValueNow);
+    const distToMax = Math.abs(value - maxValueNow);
+
+    if (
+        (distToMin < distToMax && value <= maxValueNow) ||
+        (minValueNow === maxValueNow && value < minValueNow)
+    ) {
+        // Move min handle
+        rangeMin.value = Math.min(value, maxValueNow).toString();
+    } else {
+        // Move max handle
+        rangeMax.value = Math.max(value, minValueNow).toString();
+    }
+
+    updateSlider();
+});
+
+
+const savedMin = localStorage.getItem(WHEEL_CLICKS_MIN_KEY);
+const savedMax = localStorage.getItem(WHEEL_CLICKS_MAX_KEY);
+if (savedMin) rangeMin.value = savedMin;
+if (savedMax) rangeMax.value = savedMax;
+updateSlider();
+
+/**
+ * Gets the minimum wheel clicks.
+ * @return {number}
+ */
+function getWheelClicksMin() {
+    return parseInt(localStorage.getItem(WHEEL_CLICKS_MIN_KEY) || rangeMin.value, 10);
+}
+
+/**
+ * Gets the maximum wheel clicks.
+ * @return {number}
+ */
+function getWheelClicksMax() {
+    return parseInt(localStorage.getItem(WHEEL_CLICKS_MAX_KEY) || rangeMax.value, 10);
+}
+
+window.addEventListener('storage', (event) => {
+    let updated = false;
+    if (event.key === WHEEL_CLICKS_MIN_KEY) {
+        const newValue = parseInt(event.newValue || rangeMin.value, 10);
+        const currValue = parseInt(rangeMin.value, 10);
+        if (newValue !== currValue) {
+            rangeMin.value = newValue.toString();
+            updated = true;
+        }
+    } else if (event.key === WHEEL_CLICKS_MAX_KEY) {
+        const newValue = parseInt(event.newValue || rangeMax.value, 10);
+        const currValue = parseInt(rangeMax.value, 10);
+        if (newValue !== currValue) {
+            rangeMax.value = newValue.toString();
+            updated = true;
+        }
+    }
+    if (updated) {
+        updateSlider();
+    }
+});
 
 /**
  * @template {keyof typeof DEFAULT_FILTERS} T
@@ -706,8 +855,6 @@ function showPonyWithHistory(pony, pushState = false, replaceState = false) {
 
 /** @type {(t: number) => number} */
 const CURVE_FN = t => 1 - Math.pow(1 - t, 0.62);
-const CURVE_CLICKS_MIN = 45;
-const CURVE_CLICKS_MAX = 75;
 const CURVE_MIN_MS = 32;
 const CURVE_MAX_MS = 500;
 
@@ -725,6 +872,8 @@ let ponies = [];
     let preparedSequencePromise = Promise.resolve();
     /** @type {Array<{ id: number, delay: number }>} */
     let preparedSequence = [];
+    let preparedSequenceWheelClicksMin = 0;
+    let preparedSequenceWheelClicksMax = 0;
     /** @type {Map<string, HTMLImageElement | 'error'>} */
     let preparedImages = new Map();
 
@@ -748,7 +897,11 @@ let ponies = [];
         }
         const sequence = [];
         const promises = [];
-        const curveClicks = Math.floor(Math.random() * (CURVE_CLICKS_MAX - CURVE_CLICKS_MIN + 1) + CURVE_CLICKS_MIN);
+        const currCurveClicksMin = getWheelClicksMin();
+        const currCurveClicksMax = getWheelClicksMax();
+        preparedSequenceWheelClicksMin = currCurveClicksMin;
+        preparedSequenceWheelClicksMax = currCurveClicksMax;
+        const curveClicks = Math.floor(Math.random() * (currCurveClicksMax - currCurveClicksMin + 1) + currCurveClicksMin);
         for (let i = 0; i < curveClicks; i++) {
             const delayT = CURVE_FN(i / curveClicks);
             const delay = Math.round(CURVE_MIN_MS + (CURVE_MAX_MS - CURVE_MIN_MS) * delayT)
@@ -805,6 +958,13 @@ let ponies = [];
             return;
         }
 
+        if (preparedSequenceWheelClicksMin !== getWheelClicksMin() ||
+            preparedSequenceWheelClicksMax !== getWheelClicksMax()) {
+            // If the wheel clicks range has changed, prepare a new sequence.
+            prepareSequence();
+            return playRandomPonyRollAnimation();
+        }
+
         ponyContainer.classList.add('rolling');
         newPonyButton.disabled = true;
         newPonyButton.innerHTML = 'Rolling...';
@@ -817,7 +977,7 @@ let ponies = [];
 
         for (const { id, delay } of currSequence) {
             if (delay === 0) {
-                // Skip tha last pony in the sequence, it will be shown at the end as the final result.
+                // Skip the last pony in the sequence, it will be shown at the end as the final result.
                 continue;
             }
             imageOrTextContainer.innerHTML = '';
