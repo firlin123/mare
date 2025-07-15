@@ -69,6 +69,10 @@ const filterForms = {
     group: strictGetElementById('group-filter', HTMLFormElement),
     kind: strictGetElementById('kind-filter', HTMLFormElement),
 };
+const rollHistoryDetails = strictGetElementById('roll-history', HTMLDetailsElement);
+const rollHistoryUl = strictGetElementById('roll-history-ul', HTMLUListElement);
+const rollHistorySize = strictGetElementById('roll-history-size', HTMLSpanElement);
+const clearRollHistoryButton = strictGetElementById('clear-roll-history', HTMLButtonElement);
 
 const FILTER_KEYS = {
     listType: 'selectedListTypes',
@@ -78,6 +82,7 @@ const FILTER_KEYS = {
 
 const FILTERED_PONIES_KEY = 'filteredPonies';
 const IDS_LEFT_KEY = 'idsLeft';
+const ROLL_HIST_KEY = 'rollHistory';
 
 const ALL_FILTERS = {
     listType: ['earth', 'pegasi', 'unicorns', 'alicorns', 'crystal', 'kirin', 'foal', 'wonderbolts'],
@@ -167,6 +172,133 @@ function loadSelected(name) {
         return (/** @type {any} */ (getDefault(name)));
     }
 }
+
+/**
+ * TODO: Add a description for this function.
+ * @returns {number[]}
+ */
+function getRollHistory() {
+    try {
+        const data = localStorage.getItem(ROLL_HIST_KEY);
+        if (!data) return [];
+        const history = JSON.parse(data);
+        return Array.isArray(history) ? history : [];
+    } catch {
+        return [];
+    }
+}
+
+/**
+ * TODO: Add a description for this function.
+ * @param {number[]} history
+ */
+function setRollHistory(history) {
+    localStorage.setItem(ROLL_HIST_KEY, JSON.stringify(history));
+}
+
+/**
+ * TODO: Add a description for this function.
+ * @param {number[]} history
+ * @param {number} idx
+ */
+function addRolledPony(history, idx) {
+    history.push(idx);
+    setRollHistory(history);
+}
+
+/**
+ * TODO: Add a description for this function.
+ */
+function clearRollHistory() {
+    setRollHistory([]);
+    while (rollHistoryUl.firstChild) {
+        rollHistoryUl.removeChild(rollHistoryUl.firstChild);
+    }
+    rollHistoryDetails.style.display = 'none';
+    rollHistorySize.textContent = '0';
+}
+
+/**
+ * Replaces <br> elements with spaces in the given element.
+ * @param {HTMLElement} element
+ */
+function replaceBrsWithSpaces(element) {
+    if (!(element instanceof HTMLElement)) return;
+    const brs = element.querySelectorAll('br');
+    for (const br of brs) {
+        const space = document.createTextNode(' ');
+        const parent = br.parentNode;
+        if (!parent) continue;
+        parent.replaceChild(space, br);
+    }
+}
+
+/**
+ * TODO: Add a description for this function.
+ * @param {number[]} hist
+ */
+function updateRollHistory(hist) {
+    rollHistorySize.textContent = hist.length.toString();
+    rollHistoryDetails.style.display = hist.length === 0 ? 'none' : '';
+    const existingLis = Array.from(rollHistoryUl.children);
+    const existingIds = new Set(
+        existingLis.map(li => Number(li.getAttribute('data-id')))
+    );
+    const arrSet = new Set(hist);
+
+    for (const li of existingLis) {
+        const id = Number(li.getAttribute('data-id'));
+        if (!arrSet.has(id)) {
+            rollHistoryUl.removeChild(li);
+        }
+    }
+
+    for (let i = 0; i < hist.length; ++i) {
+        const idx = hist[i];
+        if (!existingIds.has(idx)) {
+            const pony = ponies[idx];
+            if (!pony) continue;
+            const li = document.createElement('li');
+            li.setAttribute('data-id', idx.toString());
+
+            // Image
+            const imgUrl = getMainImage(pony.images);
+            if (imgUrl) {
+                const img = document.createElement('img');
+                img.src = imgUrl;
+                img.alt = pony.name.html.replace(/<[^>]+>/g, '');
+                img.style.width = '32px';
+                img.style.height = '32px';
+                img.style.objectFit = 'cover';
+                img.style.marginLeft = '8px';
+                img.style.verticalAlign = 'middle';
+                img.style.borderRadius = '4px';
+                li.appendChild(img);
+            }
+
+            const a = document.createElement('a');
+            a.href = `#${encodeURIComponent(pony.name.ids[0] || '')}`;
+            a.innerHTML = pony.name.html;
+            replaceBrsWithSpaces(a);
+            a.innerText = a.innerText.replace(/\s+/g, ' ').trim();
+            a.addEventListener('click', (e) => {
+                e.preventDefault();
+                showPonyWithHistory(pony, true);
+            });
+            li.appendChild(a);
+
+
+
+            if (rollHistoryUl.children[i]) {
+                rollHistoryUl.insertBefore(li, rollHistoryUl.children[i]);
+            } else {
+                rollHistoryUl.appendChild(li);
+            }
+        }
+    }
+}
+
+clearRollHistoryButton.addEventListener('click', clearRollHistory);
 
 /** @type {Map<number, number[]>} */
 let filteredCache = new Map();
@@ -596,6 +728,12 @@ let ponies = [];
     /** @type {Map<string, HTMLImageElement | 'error'>} */
     let preparedImages = new Map();
 
+    /** @type {number[]} */
+    let rollHistory = getRollHistory();
+    if (rollHistory.length > 0) {
+        updateRollHistory(rollHistory);
+    }
+
     /**
      * Prepares a sequence of ponies to be shown.
      * @returns {Promise<{ id: number, delay: number }[]>}
@@ -700,6 +838,8 @@ let ponies = [];
             localStorage.setItem(IDS_LEFT_KEY, JSON.stringify(idsLeft));
         }
         showPonyWithHistory(randomPony, true, true);
+        addRolledPony(rollHistory, randomIndex);
+        updateRollHistory(rollHistory);
         preparedSequence = prepareSequence();
     }
 
@@ -828,6 +968,9 @@ let ponies = [];
                 break;
             case FILTER_KEYS.kind:
                 setSelected(filterForms.kind, 'kind', loadSelected('kind'));
+                break;
+            case ROLL_HIST_KEY:
+                updateRollHistory(rollHistory = getRollHistory());
                 break;
         }
     });

@@ -100,7 +100,14 @@
         </fieldset>
     </form>
 
-    <div id="pony-container"></div>
+    <details id="roll-history" style="display: none;">
+        <summary>
+            Roll history (<span id="roll-history-size">0</span>)
+        </summary>
+        <ul id="roll-history-ul"></ul>
+        <button id="clear-roll-history" type="button">Clear History</button>
+    </details>
+    <div id="pony-container">Loading...</div>
     <button id="new-pony">Get New Pony</button>
     <script src="/RandomPony/pony.js"></script>
 </body>
