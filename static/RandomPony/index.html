@@ -11,94 +11,98 @@
 <body>
     <h1>Random Pony</h1>
 
-    <!-- List Type Filter -->
-    <form id="list-type-filter" autocomplete="off">
-        <fieldset>
-            <legend>Include Lists</legend>
-            <label>
-                <input type="checkbox" name="listType" value="earth" checked>
-                Earth
-            </label>
-            <label>
-                <input type="checkbox" name="listType" value="pegasi" checked>
-                Pegasi
-            </label>
-            <label>
-                <input type="checkbox" name="listType" value="unicorns" checked>
-                Unicorns
-            </label>
-            <label>
-                <input type="checkbox" name="listType" value="alicorns" checked>
-                Alicorns
-            </label>
-            <label>
-                <input type="checkbox" name="listType" value="crystal">
-                Crystal
-            </label>
-            <label>
-                <input type="checkbox" name="listType" value="kirin">
-                Kirin
-            </label>
-            <label>
-                <input type="checkbox" name="listType" value="foal">
-                Foal
-            </label>
-            <label>
-                <input type="checkbox" name="listType" value="wonderbolts">
-                Wonderbolts
-            </label>
-        </fieldset>
-    </form>
+    <details id="options">
+        <summary>Options</summary>
 
-    <!-- Group Filter -->
-    <form id="group-filter" autocomplete="off">
-        <fieldset>
-            <legend>Include Groups</legend>
-            <label>
-                <input type="checkbox" name="group" value="mare" checked>
-                Mare
-            </label>
-            <label>
-                <input type="checkbox" name="group" value="stallion">
-                Stallion
-            </label>
-            <label>
-                <input type="checkbox" name="group" value="colt">
-                Colt
-            </label>
-            <label>
-                <input type="checkbox" name="group" value="filly">
-                Filly
-            </label>
-        </fieldset>
-    </form>
+        <!-- List Type Filter -->
+        <form id="list-type-filter" autocomplete="off">
+            <fieldset>
+                <legend>Include Lists</legend>
+                <label>
+                    <input type="checkbox" name="listType" value="earth" checked>
+                    Earth
+                </label>
+                <label>
+                    <input type="checkbox" name="listType" value="pegasi" checked>
+                    Pegasi
+                </label>
+                <label>
+                    <input type="checkbox" name="listType" value="unicorns" checked>
+                    Unicorns
+                </label>
+                <label>
+                    <input type="checkbox" name="listType" value="alicorns" checked>
+                    Alicorns
+                </label>
+                <label>
+                    <input type="checkbox" name="listType" value="crystal">
+                    Crystal
+                </label>
+                <label>
+                    <input type="checkbox" name="listType" value="kirin">
+                    Kirin
+                </label>
+                <label>
+                    <input type="checkbox" name="listType" value="foal">
+                    Foal
+                </label>
+                <label>
+                    <input type="checkbox" name="listType" value="wonderbolts">
+                    Wonderbolts
+                </label>
+            </fieldset>
+        </form>
 
-    <!-- Kind Filter -->
-    <form id="kind-filter" autocomplete="off">
-        <fieldset>
-            <legend>Include Kind</legend>
-            <label>
-                <input type="checkbox" name="kind" value="earth" checked>
-                Earth
-            </label>
-            <label>
-                <input type="checkbox" name="kind" value="pegasus" checked>
-                Pegasus
-            </label>
-            <label>
-                <input type="checkbox" name="kind" value="unicorn" checked>
-                Unicorn
-            </label>
-            <label>
-                <input type="checkbox" name="kind" value="Alicorn" checked>
-                Alicorn
-            </label>
-            <label>
-                <input type="checkbox" name="kind" value="Kirin" checked>
-                Kirin
-            </label>
-        </fieldset>
-    </form>
+        <!-- Group Filter -->
+        <form id="group-filter" autocomplete="off">
+            <fieldset>
+                <legend>Include Groups</legend>
+                <label>
+                    <input type="checkbox" name="group" value="mare" checked>
+                    Mare
+                </label>
+                <label>
+                    <input type="checkbox" name="group" value="stallion">
+                    Stallion
+                </label>
+                <label>
+                    <input type="checkbox" name="group" value="colt">
+                    Colt
+                </label>
+                <label>
+                    <input type="checkbox" name="group" value="filly">
+                    Filly
+                </label>
+            </fieldset>
+        </form>
+
+        <!-- Kind Filter -->
+        <form id="kind-filter" autocomplete="off">
+            <fieldset>
+                <legend>Include Kind</legend>
+                <label>
+                    <input type="checkbox" name="kind" value="earth" checked>
+                    Earth
+                </label>
+                <label>
+                    <input type="checkbox" name="kind" value="pegasus" checked>
+                    Pegasus
+                </label>
+                <label>
+                    <input type="checkbox" name="kind" value="unicorn" checked>
+                    Unicorn
+                </label>
+                <label>
+                    <input type="checkbox" name="kind" value="Alicorn" checked>
+                    Alicorn
+                </label>
+                <label>
+                    <input type="checkbox" name="kind" value="Kirin" checked>
+                    Kirin
+                </label>
+            </fieldset>
+        </form>
+    </details>
 
     <details id="roll-history" style="display: none;">
         <summary>

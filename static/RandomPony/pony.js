@@ -299,8 +299,6 @@ function updateRollHistory(hist) {
     }
 }
 
-clearRollHistoryButton.addEventListener('click', clearRollHistory);
-
 /** @type {Map<number, number[]>} */
 let filteredCache = new Map();
 
@@ -871,6 +869,10 @@ let ponies = [];
     }
 
     newPonyButton.addEventListener('click', playRandomPonyRollAnimation);
+    clearRollHistoryButton.addEventListener('click', () => {
+        rollHistory = [];
+        clearRollHistory();
+    });
 
     const initialSelected = {
         listType: getSelected(filterForms.listType, 'listType'),

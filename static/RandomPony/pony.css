@@ -32,28 +32,42 @@ h1 {
     text-shadow: 1px 1px 3px var(--shadow);
 }
 
-fieldset {
-    border: 2px solid var(--primary);
-    border-radius: 10px;
-    padding: 15px;
+#options {
     margin-bottom: 20px;
-    background-color: var(--card-bg);
-    box-shadow: 0 4px 8px var(--shadow);
+    background: var(--card-bg);
+    border-radius: 10px;
+    box-shadow: 0 2px 6px var(--shadow);
+    padding: 10px 15px 5px 15px;
+    border: 1.5px solid var(--border);
 }
 
-legend {
+#options summary {
+    font-weight: bold;
+    color: var(--secondary);
+    cursor: pointer;
+    font-size: 1.1em;
+}
+
+#options:not([open]) summary {
+    margin-bottom: 5px;
+}
+
+#options fieldset {
+    border: none;
+}
+
+#options legend {
     color: var(--secondary);
     font-weight: bold;
-    padding: 0 10px;
 }
 
-label {
+#options label {
+    margin-right: 10px;
+    margin-bottom: 4px;
     display: inline-block;
-    margin-right: 15px;
-    cursor: pointer;
 }
 
-input[type="checkbox"] {
+#options input[type="checkbox"] {
     margin-right: 5px;
     cursor: pointer;
 }
@@ -202,7 +216,6 @@ details img {
         flex: 0 0 calc(50% - 10px);
     }
 }
-
 
 .color {
     display: inline-block;
@@ -422,7 +435,7 @@ details img {
     color: var(--secondary);
     cursor: pointer;
     font-size: 1.1em;
-    outline: none;
+    margin-bottom: 0;
 }
 
 #roll-history-ul {
