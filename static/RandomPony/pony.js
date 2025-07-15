@@ -174,7 +174,7 @@ function loadSelected(name) {
 }
 
 /**
- * TODO: Add a description for this function.
+ * Gets the roll history from localStorage.
  * @returns {number[]}
  */
 function getRollHistory() {
@@ -189,7 +189,7 @@ function getRollHistory() {
 }
 
 /**
- * TODO: Add a description for this function.
+ * Saves the roll history to localStorage.
  * @param {number[]} history
  */
 function setRollHistory(history) {
@@ -197,17 +197,18 @@ function setRollHistory(history) {
 }
 
 /**
- * TODO: Add a description for this function.
+ * Adds a rolled pony index to the roll history and updates the UI.
  * @param {number[]} history
  * @param {number} idx
  */
 function addRolledPony(history, idx) {
     history.push(idx);
     setRollHistory(history);
+    updateRollHistory(history);
 }
 
 /**
- * TODO: Add a description for this function.
+ * Clears the roll history and updates the UI.
  */
 function clearRollHistory() {
     setRollHistory([]);
@@ -234,7 +235,7 @@ function replaceBrsWithSpaces(element) {
 }
 
 /**
- * TODO: Add a description for this function.
+ * Updates the roll history UI based on the given history.
  * @param {number[]} hist
  */
 function updateRollHistory(hist) {
@@ -839,7 +840,6 @@ let ponies = [];
         }
         showPonyWithHistory(randomPony, true, true);
         addRolledPony(rollHistory, randomIndex);
-        updateRollHistory(rollHistory);
         preparedSequence = prepareSequence();
     }
 
