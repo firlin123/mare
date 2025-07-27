@@ -325,7 +325,7 @@
                                     currIdx = json.eventsLog.findIndex(e => e.time >= from);
                                 }
                                 else {
-                                    currIdx = emoteListEvents.reverse().find(([e, i, time]) => time < from)[1];
+                                    currIdx = emoteListEvents.reverse().find(([e, i, time]) => time <= from)[1];
                                 }
                                 const regexify = (emote) => {
                                     emote.regex = new RegExp(emote.source, 'gi');
