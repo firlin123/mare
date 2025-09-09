@@ -822,6 +822,7 @@ function showPony(pony) {
     }
     ponyElement.appendChild(contentDiv);
     ponyContainer.innerHTML = '';
+    ponyContainer.style.display = '';
     ponyContainer.appendChild(ponyElement);
     pupulateWithComputedColors(coatColorP);
     pupulateWithComputedColors(maneColorP);
