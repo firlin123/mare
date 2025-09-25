@@ -1,0 +1,683 @@
+<svg version="1.2"
+	xmlns="http://www.w3.org/2000/svg" viewBox="0 0 5000 5000" width="5000" height="5000">
+	<title>xstare</title>
+	<defs>
+		<clipPath clipPathUnits="userSpaceOnUse" id="cp1">
+			<path d="m1670.2 3948.6c168.86-15.49 302.48-159.38 373.94-373.01 22.83-68.27 34.93-142.13 43.05-223.34 13.43-134.48 25.85-298.93-0.77-449.11-87.51-493.55-342.04-831.49-678.84-786.53-77.46 10.34-145.97 61.99-204.35 122.26-70.13 72.39-134.55 176.67-170.28 300.39-11.53 39.93-11.86 81.11-19.17 125.1-19.73 118.85-23.5 251.68-7.71 391.75 57.54 510.15 351.78 921.14 664.13 892.49z"/>
+		</clipPath>
+		<clipPath clipPathUnits="userSpaceOnUse" id="cp2">
+			<path d="m1649.51 2399.94c254.29-11.33 483.72 283.71 512.59 667.36 29.49 391.91-161.08 721.36-425.58 729.27-263.05 7.86-490.46-305.89-509.68-694.32-18.82-380.31 169.73-691.04 422.67-702.31z"/>
+		</clipPath>
+		<linearGradient id="g1" x2="1" gradientUnits="userSpaceOnUse" gradientTransform="matrix(-25.168,1441.858,-972.348,-16.972,1708.105,2378.057)">
+			<stop offset="0" stop-color="#20205d"/>
+			<stop offset=".15" stop-color="#20205d"/>
+			<stop offset=".547" stop-color="#506bcb"/> 
+			<stop offset="1" stop-color="#506bcb"/>
+		</linearGradient>
+		<clipPath clipPathUnits="userSpaceOnUse" id="cp3">
+			<path d="m3451.28 3928.56c-157.3-15.2-288.06-147.5-366.63-345.81-25.37-64.04-41.29-133.86-54.09-211.22-21.4-129.41-44.17-290.02-29.24-440.16 50.98-512.65 284.49-895.37 634.35-868.89 81.6 6.18 155.38 59.52 218.68 123.17 75.88 76.31 146.1 188.01 185.86 321.76 12.74 42.85 13.69 87.46 21.98 134.56 22.23 126.26 27.81 266.33 13.28 412.46-50.98 512.65-328.59 902.71-624.19 874.13z"/>
+		</clipPath>
+		<clipPath clipPathUnits="userSpaceOnUse" id="cp4">
+			<path d="m3400.26 3740.97c-258.52-2.31-464.7-315.04-461.26-699.61 3.45-384.56 215.19-693.55 473.71-691.23 258.52 2.31 464.7 315.03 461.26 699.6-3.45 384.57-215.19 693.56-473.71 691.24z"/>
+		</clipPath>
+		<linearGradient id="g2" x2="1" gradientUnits="userSpaceOnUse" gradientTransform="matrix(-25.058,1435.571,-965.028,-16.845,3419.015,2327.763)">
+			<stop offset="0" stop-color="#20205d"/>
+			<stop offset=".15" stop-color="#20205d"/>
+			<stop offset=".547" stop-color="#506bcb"/>
+			<stop offset="1" stop-color="#506bcb"/>
+		</linearGradient>
+	</defs>
+	<style>
+		.s0 { fill: #83c5ee;stroke: #467bbc;stroke-miterlimit:100;stroke-width: 100 } 
+		.s1 { display: none;fill: none;stroke: #467bbc;stroke-miterlimit:100;stroke-width: 100 } 
+		.s2 { fill: #467bbc } 
+		.s3 { fill: #383cb1;stroke: #313396;stroke-miterlimit:100;stroke-width: 100 } 
+		.s4 { fill: #83c5ee } 
+		.s5 { display: none;fill: none;stroke: #467bbc;stroke-miterlimit:100;stroke-width: 80 } 
+		.s6 { fill: #ffffff } 
+		.s7 { fill: url(#g1) } 
+		.s8 { fill: #acacf7 } 
+		.s9 { fill: #dbdcfa } 
+		.s10 { fill: #000000 } 
+		.s11 { fill: #d0d1ec } 
+		.s12 { display: none;fill: none;stroke: #9e9fdc;stroke-miterlimit:100;stroke-width: 100 } 
+		.s13 { fill: #9e9fdc } 
+		.s14 { display: none;fill: none;stroke: #9e9fdc;stroke-miterlimit:100;stroke-width: 50 } 
+		.s15 { fill: none;stroke: #467bbc;stroke-miterlimit:100;stroke-width: 30 } 
+		.s16 { fill: #383cb1 } 
+		.s17 { display: none;fill: none;stroke: #313396;stroke-miterlimit:100;stroke-width: 80 } 
+		.s18 { fill: #313396 } 
+		.s19 { fill: url(#g2) } 
+	</style>
+	<g id="V">
+		<g id="Body">
+			<path id="BG" fill-rule="evenodd" class="s0" d="m1601 5354c22.97-306.34 257.08-967.32 996.6-967.95 739.52-0.64 1034.22 468.82 1053.16 961.14"/>
+			<path id="Outline 2 src" fill-rule="evenodd" class="s1" d="m1888.21 4613.07c9.74 105.88 38.34 305.47 115.64 449.09"/>
+			<path id="Outline 2" class="s2" d="m1937.99 4608.54l-99.58 9.12c9.99 109.11 37.35 312.07 121.47 468.25 28.84-169.16-12.48-374.68-21.89-477.37z"/>
+			<path id="Outline 1 src" fill-rule="evenodd" class="s1" d="m3327.05 4570.68c-7.15 103.58-18.75 296.35-98.24 476.52"/>
+			<path id="Outline 1" class="s2" d="m3274.54 5067.38c84.09-190.6 95.28-390.19 102.44-493.21l-99.76-6.94c-7.24 104.18-38.08 309.18-2.68 500.15z"/>
+		</g>
+		<path id="Mane back" fill-rule="evenodd" class="s3" d="m4244.19 2165.1c203.74 502.9-5.98 1235.15-307.81 1738.09-394.77 657.81-489.77 1311.3 55.67 2033.13-664.54-236.22-863.18-980.62-722.88-1501.74 118.13-438.75 553.88-3309.02 975.02-2269.48z"/>
+		<path id="Hoofa" fill-rule="evenodd" class="s0" d="m3555.5 5996c-205.44 0-371.5-145.95-371.5-326.5 0-180.55 166.06-326.5 371.5-326.5 205.44 0 371.5 145.95 371.5 326.5 0 180.55-166.06 326.5-371.5 326.5z"/>
+		<path id="Face BG" fill-rule="evenodd" class="s0" d="m4106.65 2302.08c52.72 257.96 73.32 555.06 48.57 889.89-18.76 253.74-81.96 507.31-199.49 729.47-87.91 166.18-216.37 306.96-352.45 427.74-327.53 290.69-662.53 397.06-1056.36 400.26-362.05 2.94-727.43-139.73-962.03-304.29-171.61-120.38-372.53-308.84-513.42-578.39-123.37-236.05-198.42-539.47-205.78-877.45-12.54-575.02 179.76-1146.09 558.55-1507.05 317.02-302.08 702.47-434.35 1078.76-432.49 854.89 4.23 1469.87 597.73 1603.65 1252.31z"/>
+		<g id="Right ear">
+			<path id="BG" class="s4" d="m1057.88 710.27c-263.5 5.86-592.4 594.23-605.06 1155.47-10.05 445.61 208.84 864.65 515.17 978.96 81.21 30.3 349.81-921.61 386.05-1127.8 49.31-280.55-71.68-1011.61-296.16-1006.63z"/>
+			<path id="Outline 2 src" fill-rule="evenodd" class="s1" d="m1403.75 1711.12c-27.14-231.95-81.34-558.71-125.78-711.66-50.08-172.36-129.44-288.74-213.61-293.87-200.96-12.27-513.33 437.47-593.54 949.43-72.41 462.21 145.67 1096.27 491.69 1209.72"/>
+			<path id="Outline 2" class="s2" d="m967.99 2844.7c-208.74-70.52-401.86-461.12-447.22-781.35-19.53-137.83-20-276.62-0.57-400.61 38.91-248.36 135.02-483.42 244.07-651.84 54.52-84.21 112.4-151.68 165.65-195.54 53.25-43.86 100.51-61.75 131.43-59.85h0.01 0.01c20.06 1.21 50.06 18.79 81.89 63.36 31.83 44.57 62.81 112.28 86.73 194.58 42.11 145.05 97.21 473.81 124.05 703.45 92.08-230.81 18.66-570.59-28.02-731.34v-0.01c-26.19-90.1-59.95-166.79-101.38-224.79-41.41-58-93.16-101.17-157.18-105.07q-0.01 0-0.01 0-6.52-0.39-13.01-0.35c-64.95 0.39-127.76 33.13-188.1 82.84-64.36 53.01-127.29 127.68-186.01 218.37-117.45 181.38-217.64 427.17-258.93 690.71-21.3 136-21.65 283.98-0.1 430.16 48.44 328.58 279.32 738.02 546.69 767.28z"/>
+			<path id="Outline 1 src" fill-rule="evenodd" class="s5" d="m848.84 1078.39c-82.63 242-208.37 737.35 21.84 1188.87"/>
+			<path id="Outline 1" class="s2" d="m886.42 1089.92c-73.78 238.09-214.43 707.24 30.99 1156.74-371.89-440.62-183.79-877.84-30.99-1156.74z"/>
+		</g>
+		<g id="Snoofa">
+			<path id="Outline 4" fill-rule="evenodd" class="s2" d="m2133 4519c248.61-247.53 546.41-289.23 846-16-299.59-143.73-590.07-134.22-846 16z"/>
+			<path id="Outline 3" fill-rule="evenodd" class="s2" d="m2304 3796c109.51-106.92 348.23-112.18 461.78-22.01-124.04-14.85-284.91-14.84-461.78 22.01z"/>
+			<path id="Outline 2" fill-rule="evenodd" class="s2" d="m2291.11 3949.36c-5.98 38.37-8.47 111.61 101.89 142.64-77.47 52.19-215.5-10.6-101.89-142.64z"/>
+			<path id="Outline 1" fill-rule="evenodd" class="s2" d="m2764 3927c16.56 72.53-6.53 118.19-90.14 156.79 139.1 40.88 174-83.77 90.14-156.79z"/>
+		</g>
+		<g id="Left eye">
+			<g id="Sclera mask" clip-path="url(#cp1)">
+				<path id="Sclera" fill-rule="evenodd" class="s6" d="m1683.33 3994.99c169.53-20.93 305.32-168.29 380.87-385.27 24.36-69.93 38.08-145.62 47.99-229.13 16.52-139.34 32.84-311.43 8.8-469.7-81.03-533.71-346.89-911.23-710.75-859.24-84.09 12.01-158.14 71.09-220.94 139.8-75.21 82.3-143.4 200.07-179.74 338.48-11.67 44.43-11.2 89.99-18.18 138.59-18.75 130.56-20.01 274.89-0.33 425.16 69.91 533.7 376.78 940.27 692.28 901.31z"/>
+				<g id="Eye center">
+					<g id="Iris mask" clip-path="url(#cp2)">
+						<path id="Iris" fill-rule="evenodd" class="s7" d="m1648.17 2378.34c262.32-11.75 499.16 292.48 529.12 688.39 30.62 404.72-166.11 745.08-439.32 753.18-271.65 8.06-506.34-316.1-526.02-717.1-19.26-392.36 175.32-712.78 436.22-724.47z"/>
+						<path id="Highlight 2" fill-rule="evenodd" class="s8" d="m1213.42 3270.36l716.17-157.22-563.56 532.38z"/>
+						<path id="Highlight 1" fill-rule="evenodd" class="s9" d="m1423.25 3711.07l506.34-597.93-580.71 489.93z"/>
+					</g>
+					<path id="Pupil" fill-rule="evenodd" class="s10" d="m1710.71 2550.14c203.58-2.5 378.85 250.64 391.35 569.14 12.62 321.66-145.41 583.79-352.74 583.52-206.31-0.27-379.58-260.53-388.45-579.4-8.78-315.76 147.24-570.77 349.84-573.26z"/>
+					<path id="Shine 2" fill-rule="evenodd" class="s6" d="m1654.53 2520.45c-90.64 53.53-87.35 220.15 3.72 367.49 87.56 141.66 224.33 212.73 309.23 163.72 85.16-49.17 90.28-203.02 8.38-349.09-85.21-151.98-230.39-235.83-321.33-182.12z"/>
+					<path id="Shine 1" fill-rule="evenodd" class="s6" d="m1565.28 3012c-28.48 25.32-22.58 77.35 14.31 117.5 38.1 41.48 94.19 54.19 124.29 27.22 30.06-26.92 21.23-81.81-18.51-121.62-38.47-38.54-91.65-48.39-120.09-23.1z"/>
+				</g>
+			</g>
+			<path id="Outline" fill-rule="evenodd" class="s10" d="m1017.12 2537.59c-13.77 63.85-22.04 104.3-5.18 138.22 30.27-120.31 83.62-249.27 160.29-346.77 74.74-95.04 188.25-184.38 270.41-191.02 349.39-28.22 580.1 521.73 622.3 891.83 17.65 154.74 4.49 436.21-23.86 554.72 58.53-109.57 76.15-391.85 69.65-552.51-19.58-483.64-287.85-986.64-673.93-950.67-180.74 16.84-370.48 227.99-419.68 456.2z"/>
+			<path id="Eyelash 3" fill-rule="evenodd" class="s10" d="m1240.37 2205.24c-255.97-316.25-329.47-270-54.51 46.64 17.77-12.88 34.04-28.23 54.51-46.64z"/>
+			<path id="Eyelash 2" fill-rule="evenodd" class="s10" d="m1109.84 2346.86c-500.03-159.54-527.87-78.12-27.62 65.09 11.44-9.88 24.55-52.08 27.62-65.09z"/>
+			<path id="Eyelash 1" fill-rule="evenodd" class="s10" d="m1028.18 2570.94c-437.39 37.06-442.97 126.34-11.38 68.55 2.92-20.18 8.6-53.18 11.38-68.55z"/>
+            <path id="Move area" fill-rule="evenodd" fill="#00000000" d="m1458.44 2233.28c96.37-1.68 211.89 66.84 313.36 210.54 101.49 143.72 181.15 354.24 205.44 589.03v0.01c24.38 235.5-12.28 446.88-81.56 589.16-69.27 142.27-156.75 206.82-253.8 208.29h-0.02-0.02c-96.98 1.51-212.85-67.79-314.33-212.45-101.48-144.66-180.77-356.2-204.41-591.36v-0.01-0.01c-23.6-234.45 13.38-444.48 82.57-585.87 69.19-141.37 156.44-205.6 252.77-207.33z"/>
+		</g>
+		<g id="Mane front 2">
+			<path id="BG 2" fill-rule="evenodd" class="s11" d="m3985.19 1055.1c-691.77-629.38-1692.67-524.13-2454.91 20.03-597.01 426.2-964.54 978.73-932.88 2080.86 809.56-764.76 2496.59-1728.49 3387.79-2100.89z"/>
+			<path id="Outline 2 src" fill-rule="evenodd" class="s12" d="m3985.19 1055.1c-691.77-629.38-1692.67-524.13-2454.91 20.03-597.01 426.2-964.54 978.73-932.88 2080.86"/>
+			<path id="Outline 2" class="s13" d="m2870.2 608.31c-307.36-2.19-995.05 176.11-1360.53 437.84-605.1 433.32-1011.27 999.97-979.24 2113.65l116.95-5.24c-31.37-1090.51 323.71-1618.8 911.97-2038.77 747.83-533.84 1720.21-635.08 2392.2-23.71l67.3-73.97c-333.57-303.47-728.59-406.81-1148.65-409.8z"/>
+			<path id="BG 1" fill-rule="evenodd" class="s11" d="m2140.95 865.91c-247.17-35.83-353.19-136.37-407.86-217.37 160.11 41.49 552.47 106.5 806.91 86.46"/>
+			<path id="Outline 1 src" fill-rule="evenodd" class="s14" d="m2140.95 865.91c-247.17-35.83-353.19-136.37-407.86-217.37 160.11 41.49 552.47 106.5 806.91 86.46"/>
+			<path id="Outline 1" class="s13" d="m2144.48 841.16c-185.79-26.92-286.16-89.41-346.2-151.67 188 40.62 515.7 88.36 743.68 70.43l-3.92-49.84c-248.18 19.51-642.03-45.18-798.67-85.78l-63.98-16.59 36.99 54.78c57.71 85.46 239.66 275.39 432.1 178.67z"/>
+		</g>
+		<g id="Horn">
+			<path id="Outline 3" fill-rule="evenodd" class="s0" d="m2258.58 1610.01c7.68-258.28 23.83-483.12 48.72-688.39 58.8-484.91 124.43-820.26 215.01-825.99 126.34-7.99 236.05 256.48 341.99 793.72 32.46 164.61 64.57 354.82 96.7 570.65"/>
+			<path id="Outline 2" fill-rule="evenodd" class="s15" d="m2362.79 529c84.03 115.24 277.03 43.45 384.89-114.29"/>
+			<path id="Outline 1" fill-rule="evenodd" class="s15" d="m2314.48 863.24c124.78 218.8 410.76 95.23 510.34-160.71"/>
+		</g>
+		<g id="Mane front 1">
+			<path id="BG 2" class="s16" d="m3732.18 1430.26c-517.32 280.7-551.17 750.79-986.89 942.03 51.26-92.74 90.4-298.53 114.43-466.05q-0.09 0.02-0.18 0.03c-469.06 82.33-1338.13 651.26-1649.09 997.01-299.15 332.62-451.57 511.6-872.39 561.57 296.68-354.46 99.15-335.72 337.47-635.05 684.4-859.59 1628.76-1498.48 3205.5-1717.27 129.37-17.96 368.47 37.02-148.85 317.73z"/>
+			<path id="Outline 2 src" fill-rule="evenodd" class="s17" d="m2885.98 1679.26c-7.85 108.26-58.8 544.89-140.69 693.03 435.72-191.24 529.66-718.5 977.54-966.1"/>
+			<path id="Outline 2" class="s18" d="m3262.01 1933.68c129.62-190.09 265.73-373.92 480.15-492.48l3.12-25.29c-217.79 81.59-426.33 289.02-548.27 471.13-108.27 161.71-224.32 306.91-378 403.39 25.2-84.69 47.86-178.75 63.83-272.9 24.2-142.74 30.54-275.77 30.11-341.97-55.71 56.71-83.53 135.38-113.88 328.32-22.02 139.96-27.76 274.32-162.5 463.34 334.43-125.87 495.52-343 625.44-533.54z"/>
+			<path id="Outline 1 src" fill-rule="evenodd" class="s17" d="m3881.03 1112.53c-1576.74 218.79-2519.45 859-3205.5 1717.27-267.01 334.05-39.01 281.38-372.12 654.27 440.32-53.43 607.89-248.17 907.04-580.79 310.96-345.75 1180.03-914.68 1649.09-997.01"/>
+			<path id="Outline 1" class="s18" d="m831.91 3327.63c181.47-111.58 268.36-218.91 417.8-385.08 150.4-167.24 436.6-405.31 750.13-597.79 295.12-181.18 643.38-359.9 866.57-399.06l-13.83-78.8c-245.81 43.14-580.88 207.92-898 405.12-317.12 197.19-613.33 425.97-773.92 604.53-149.66 166.42-264.94 296.07-394.22 389.37-107 77.22-230.65 136.87-389.62 167.91 104.56-140.19 140.7-216.91 156.31-282.12 18.57-77.51 22.94-133.43 153.61-296.94h0.01c121.54-152.05 249.89-299.22 389.47-436.41 238.44-234.35 507.57-443.28 816.41-624.52 523.28-307.08 1163.66-529.29 1973.87-641.72l-11-79.24c-814.34 113.01-1462.78 337.7-1994.18 647.83-316.15 184.51-599.08 392.59-843 631.12-144.11 140.93-269.25 296.85-394.06 452.99h-0.01c-72.38 90.58-133.21 253.59-153.17 333.96-18.06 72.74-122.25 260.9-230.11 363.66 146.32-4.25 424.87-85 570.94-174.81z"/>
+		</g>
+		<g id="Left ear">
+			<path id="BG" class="s4" d="m4525.79 1647.27c-95.05-527.29-419.32-981.84-585.79-974.44-203.79 9.07-351.6 643.05-300.63 973.36 37.04 239.99 301.82 1149.29 419.95 1106.52 431.97-156.41 516.08-830.25 466.47-1105.44z"/>
+			<path id="Outline 2 src" fill-rule="evenodd" class="s1" d="m3589.71 1640.38c27.15-233.13 73.8-506.98 119.01-662.56 51.17-176.07 132.42-295.23 218.49-300.2 205.36-11.87 519.43 448.11 594.9 963.64 70.26 479.94-163.91 1050.48-444.89 1158.13"/>
+			<path id="Outline 2" class="s2" d="m4566.99 2047.38c14.45-137.37 24.46-277.7 4.6-413.33-38.89-265.52-138.28-514.81-256.07-699.32-58.89-92.25-122.27-168.38-187.34-222.51-60.99-50.75-124.7-84.24-190.64-84.85l-0.01-0.01q-6.6-0.06-13.22 0.32c-65.1 3.78-117.85 47.67-160.12 106.82-42.27 59.15-76.76 137.43-103.49 229.33v0.01 0.01c-47.02 161.85-113.25 473.48-21.33 682.34 26.96-231.13 73.97-505.07 117.35-654.42l0.01-0.02c24.47-84.09 56.17-153.41 88.83-199.11 32.66-45.7 63.56-63.9 84.56-65.12 32.04-1.86 80.17 16.69 134.1 61.57 53.95 44.88 112.3 113.74 167.01 199.45 109.44 171.42 204.79 409.93 241.41 660.01 18.71 127.69 8.18 262.62-6.6 394.81-24.65 220.59-201.28 624.64-406.72 709.35 263.77-21.65 483.65-476.85 507.67-705.33z"/>
+			<path id="Outline 1 src" fill-rule="evenodd" class="s5" d="m4145.08 1059.34c82.15 245.34 202.51 733.23-25.48 1180.55"/>
+			<path id="Outline 1" class="s2" d="m4107.17 1071.99c80.77 241.43 196.16 711.38-20.34 1152.44 334.34-456.05 192.28-872.67 20.34-1152.44z"/>
+		</g>
+		<g id="Right eye">
+			<g id="Sclera mask" clip-path="url(#cp3)">
+				<path id="Sclera" fill-rule="evenodd" class="s6" d="m3446.62 3977.55c-165.56-16-303.18-155.25-385.88-363.97-26.7-67.41-43.46-140.88-56.92-222.31-22.53-136.2-46.5-305.25-30.79-463.27 53.66-539.57 299.43-942.38 667.66-914.51 85.88 6.5 163.55 62.64 230.17 129.63 79.86 80.32 153.76 197.89 195.62 338.66 13.41 45.1 14.4 92.05 23.13 141.62 23.39 132.89 29.27 280.32 13.97 434.12-53.66 539.57-345.83 950.11-656.96 920.03z"/>
+				<g id="Eye center">
+					<g id="Iris mask" clip-path="url(#cp4)">
+						<path id="Iris" fill-rule="evenodd" class="s19" d="m3400.06 3763.33c-266.83-2.38-479.64-325.17-476.09-722.1 3.56-396.94 222.11-715.86 488.94-713.47 266.83 2.39 479.64 325.17 476.09 722.11-3.55 396.93-222.11 715.85-488.94 713.46z"/>
+						<path id="Highlight 2" fill-rule="evenodd" class="s8" d="m3896.19 3186.79l-723.04-136.35 586.7 508.2z"/>
+						<path id="Highlight 1" fill-rule="evenodd" class="s9" d="m3706.14 3623.37l-532.99-572.93 601.85 466.56z"/>
+					</g>
+					<path id="Pupil" fill-rule="evenodd" class="s10" d="m3374.21 3657.56c-203.83 3.39-372.86-250.57-378.14-568.14-5.28-317.58 155.21-577.02 359.04-580.41 203.84-3.39 372.87 250.57 378.15 568.15 5.28 317.57-155.21 577.01-359.05 580.4z"/>
+					<path id="Shine 2" fill-rule="evenodd" class="s6" d="m3674.28 2980.35c-86.1 57.32-235.49-16.2-334.2-164.48-98.71-148.27-108.9-314.46-22.79-371.79 86.1-57.32 235.49 16.2 334.2 164.48 98.71 148.27 108.9 314.46 22.79 371.79z"/>
+					<path id="Shine 1" fill-rule="evenodd" class="s6" d="m3388.97 3061.41c-27.7 28.41-83.95 18.36-125.85-22.49-41.89-40.85-53.37-96.83-25.66-125.24 27.7-28.41 83.95-18.36 125.85 22.49 41.89 40.85 53.36 96.83 25.66 125.24z"/>
+				</g>
+			</g>
+			<path id="Outline" fill-rule="evenodd" class="s10" d="m4061.7 2494.06c15.41 67.2 17.17 111.51 0.49 147.91-33.53-125.95-83.83-263.14-165.47-364.5-79.96-99.29-186.95-181.8-271.86-189.24-393.36-34.45-603.56 592.25-601.85 952.24 0.74 155.74 27.95 427.89 61.64 542.28-62.25-105.01-100.15-378.02-106.25-538.67-21.68-570.08 280.78-1031.15 650.42-1017.87 188.34 6.76 377.24 225.27 432.88 467.85z"/>
+			<path id="Eyelash 3" fill-rule="evenodd" class="s10" d="m3822.77 2146.67c260.62-361.58 339.29-313.86 57.82 48.05-18.77-13.13-36.07-29.03-57.82-48.05z"/>
+			<path id="Eyelash 2" fill-rule="evenodd" class="s10" d="m3961.75 2293.88c521.97-196.98 551.7-108.93 30.08 68.75-12.06-10.1-26.6-54.88-30.08-68.75z"/>
+			<path id="Eyelash 1" fill-rule="evenodd" class="s10" d="m4050.95 2529.93c454.06 21.9 460.1 116.55 13.05 72.07-3.39-21.2-9.88-55.89-13.05-72.07z"/>
+			<path id="Move area" fill-rule="evenodd" fill="#00000000" d="m3601.04 2180.5c92.53-0.34 182.08 63.06 255.85 206.87 73.77 143.81 117.63 358.25 102.35 598.21-15.27 239.91-86.23 456.36-180.89 604.76-94.65 148.4-204.58 219.05-297.15 219.36h-0.02-0.02c-92.52 0.34-182.08-63.06-255.85-206.87-73.77-143.81-117.62-358.25-102.35-598.21 15.27-239.91 86.23-456.33 180.88-604.72 94.66-148.39 204.6-219.06 297.2-219.4z"/>
+		</g>
+	</g>
+	<script><![CDATA[
+/**
+ * @typedef {Object} PointLike
+ * @property {number} x
+ * @property {number} y
+ */
+
+/**
+ * Find the center point of an SVG path
+ * @param {SVGPathElement} path
+ */
+function findSVGPathCenter(path) {
+    const length = path.getTotalLength();
+
+    const p00 = path.getPointAtLength(0);
+    const p25 = path.getPointAtLength(length * 0.25);
+    const p50 = path.getPointAtLength(length * 0.5);
+    const p75 = path.getPointAtLength(length * 0.75);
+
+    return getIntersection(p00, p50, p25, p75);
+}
+
+/**
+ * Get intersection point of two line segments
+ * @param {PointLike} l1s start of line 1
+ * @param {PointLike} l1e end of line 1
+ * @param {PointLike} l2s start of line 2
+ * @param {PointLike} l2e end of line 2
+ * @return {PointLike | null} intersection point or null if line segments do not intersect
+ */
+function getIntersection(l1s, l1e, l2s, l2e) {
+    const x1 = l1s.x, y1 = l1s.y;
+    const x2 = l1e.x, y2 = l1e.y;
+    const x3 = l2s.x, y3 = l2s.y;
+    const x4 = l2e.x, y4 = l2e.y;
+
+    // Compute denominators
+    const denom = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+
+    if (denom === 0) {
+        // lines are parallel or coincident
+        return null;
+    }
+
+    const px =
+        ((x1 * y2 - y1 * x2) * (x3 - x4) -
+            (x1 - x2) * (x3 * y4 - y3 * x4)) /
+        denom;
+    const py =
+        ((x1 * y2 - y1 * x2) * (y3 - y4) -
+            (y1 - y2) * (x3 * y4 - y3 * x4)) /
+        denom;
+
+    if (
+        px < Math.min(x1, x2) - 1e-6 ||
+        px > Math.max(x1, x2) + 1e-6 ||
+        px < Math.min(x3, x4) - 1e-6 ||
+        px > Math.max(x3, x4) + 1e-6 ||
+        py < Math.min(y1, y2) - 1e-6 ||
+        py > Math.max(y1, y2) + 1e-6 ||
+        py < Math.min(y3, y4) - 1e-6 ||
+        py > Math.max(y3, y4) + 1e-6
+    ) {
+        return null; // Intersection outside segment bounds
+    }
+
+    return { x: px, y: py };
+}
+
+/**
+ * Get angle of point relative to center
+ * @param {PointLike} pt
+ * @param {PointLike} center
+ * @returns {number} Angle in degrees [-180, 180]
+ */
+function getAngle(pt, center) {
+    const dx = pt.x - center.x;
+    const dy = pt.y - center.y;
+    return Math.atan2(dy, dx) * 180 / Math.PI;
+}
+
+/**
+ * Build a lookup map for fast angle -> boundary interpolation
+ * @param {SVGPathElement} path
+ * @param {PointLike} center
+ * @returns {{ [k: number]: {point:[number,number,number], next:[number,number,number]}}}
+ */
+function buildAngleMap(path, center) {
+    /** @type {{ [k: number]: [number,number,number] }} */
+    const points = {};
+    const length = path.getTotalLength();
+    let stepLength = length / 720;
+    let curr = 0;
+    let angle = getAngle(path.getPointAtLength(0), center);
+    let angleKey = Math.round(angle * 2); // 0.5° resolution
+    const startAngleKey = angleKey;
+    let noAdvance = 0;
+    while (true) {
+        let next = curr + stepLength;
+        if (next > length) {
+            next -= length;
+        }
+        const pt = path.getPointAtLength(next);
+        const nextAngle = getAngle(pt, center);
+        const nextAngleKey = Math.round(nextAngle * 2);
+        if (nextAngleKey === angleKey) {
+            // if we didn't advance to the next angle key, the step is too small.
+            // Increase and try again
+            stepLength *= 1.5;
+            noAdvance++;
+        } else if (nextAngleKey !== angleKey + 1) {
+            // If we skipped at least one angle key, the step is too large.
+            // Decrease and try again
+            stepLength /= 1.5;
+            noAdvance++;
+        } else {
+            // Valid step, store and continue
+            /** @type {[number,number,number]} */
+            const point = [angle, pt.x, pt.y];
+            if (angleKey === -360) {
+                points[360] = point;
+            }
+            points[angleKey] = point;
+            curr = next;
+            angle = nextAngle;
+            angleKey = nextAngleKey;
+            noAdvance = 0;
+            if (angleKey === startAngleKey) {
+                // Completed full circle
+                break;
+            }
+            if (angleKey === 360) {
+                angleKey = -360;
+            }
+        }
+        if (noAdvance > 20) {
+            // Something is wrong, we are not making progress
+            console.warn('buildAngleMap: No progress after 20 attempts, stopping');
+            throw new Error('buildAngleMap: No progress after 20 attempts, stopping');
+        }
+    }
+
+    /** @type {{ [k: number]: {point:[number,number,number], next:[number,number,number]}}} */
+    const map = {};
+    for (let i = -360; i <= 360; i++) {
+        const next = points[(i === 360 ? -360 : i) + 1];
+        map[i] = { point: points[i], next };
+    }
+    return map;
+}
+
+/**
+ * Project a point to the boundary of a path
+ * @param {{ [k: number]: {point:[number,number,number], next:[number,number,number]}}} angleMap Angle map from buildAngleMap
+ * @param {PointLike} center Center point of the path
+ * @param {PointLike} cursor Point to project
+ * @returns {PointLike} Projected point on the path boundary
+ */
+function projectToPathBoundary(angleMap, center, cursor) {
+    let cursorA = getAngle(cursor, center);
+    const angleKey = Math.round(cursorA * 2);
+    const entry = angleMap[angleKey];
+
+    if (!entry) {
+        console.warn('projectToPathBoundary: No entry for angle', cursorA, angleKey);
+        return { x: center.x, y: center.y };
+    }
+
+    let pointA = entry.point[0];
+    const pointX = entry.point[1];
+    const pointY = entry.point[2];
+    let nextA = entry.next[0];
+    const nextX = entry.next[1];
+    const nextY = entry.next[2];
+
+    if (angleKey === 360 || angleKey === -360) {
+        if (pointA < 0) {
+            pointA += 360;
+        }
+        if (nextA < 0) {
+            nextA += 360;
+        }
+        if (cursorA < 0) {
+            cursorA += 360;
+        }
+    }
+
+    const deltaA = nextA - pointA;
+    const deltaX = nextX - pointX;
+    const deltaY = nextY - pointY;
+
+    const cursolDeltaA = cursorA - pointA;
+    const x = (cursolDeltaA * deltaX) / deltaA + pointX;
+    const y = (cursolDeltaA * deltaY) / deltaA + pointY;
+
+    return { x, y };
+}
+
+/**
+ * Get intersection point of two rays.
+ * @param {PointLike} r1b Ray 1 base point
+ * @param {PointLike} r1v Ray 1 direction vector
+ * @param {PointLike} r2b Ray 2 base point
+ * @param {PointLike} r2v Ray 2 direction vector
+ * @returns {PointLike | null} Intersection point or null if rays are parallel or don't intersect
+ */
+function intersectRays(r1b, r1v, r2b, r2v) {
+    const cross = r1v.x * r2v.y - r1v.y * r2v.x;
+    if (Math.abs(cross) < 1e-10) {
+        // No intersection or infinite intersections.
+        return null;
+    }
+
+    // Parameters for the intersection
+    const dx = r2b.x - r1b.x;
+    const dy = r2b.y - r1b.y;
+
+    const t1 = (dx * r2v.y - dy * r2v.x) / cross;
+    const t2 = (dx * r1v.y - dy * r1v.x) / cross;
+
+    // Check if intersection is in the forward direction of both rays
+    if (t1 < 0 || t2 < 0) {
+        // Intersection exists but not in the forward direction of both rays
+        return null;
+    }
+
+    // Calculate intersection point
+    return {
+        x: r1b.x + t1 * r1v.x,
+        y: r1b.y + t1 * r1v.y
+    };
+}
+
+/**
+ * Strict version of querySelector that checks for null and type
+ * @template T
+ * @param {string} selector CSS selector
+ * @param {new (...args: any[]) => T} type Expected type of the element
+ * @param {string} nickName Nickname for error messages
+ * @returns {T}
+ */
+function strictQuerySelector(selector, type, nickName) {
+    const el = document.querySelector(selector);
+    if (!el) {
+        throw new Error("Could not find " + nickName + " element (" + selector + ")");
+    }
+    if (!(el instanceof type)) {
+        throw new Error("Element " + nickName + " (" + selector + ") is not of type " + type.name);
+    }
+    return el;
+}
+
+/**
+ * Calculate distance between two points
+ * @param {PointLike} a
+ * @param {PointLike} b
+ * @returns {number}
+ */
+function distance(a, b) {
+    const dx = a.x - b.x;
+    const dy = a.y - b.y;
+    return Math.sqrt(dx * dx + dy * dy);
+}
+
+/**
+ * Bell curve function
+ * @param {number} x Input [0, 1]
+ * @param {number} maxY Maximum output value
+ * @return {number} Output [0, maxY]
+ */
+function bellCurve(x, maxY) {
+    return (maxY * Math.sin(Math.PI * (x * 2 - 0.5)) + maxY) / 2;
+}
+
+/**
+ * Calculate the length from a point to the center line between the two eyes
+ * @param {PointLike} cursor
+ * @returns {number}
+ */
+function distanceToCenterLine(cursor) {
+    const numerator = (center.x - cursor.x) * lrVec.x + (center.y - cursor.y) * lrVec.y;
+    const denominator = lrVec.x * lrVec.x + lrVec.y * lrVec.y;
+    const ps = numerator / denominator;
+    const curP = {
+        x: cursor.x + ps * lrVec.x,
+        y: cursor.y + ps * lrVec.y,
+    };
+    const curLen = Math.sqrt((curP.x - cursor.x) ** 2 + (curP.y - cursor.y) ** 2);
+    return curLen;
+}
+
+const svg = strictQuerySelector('svg', SVGSVGElement, 'SVG element');
+
+const leftMAPath = strictQuerySelector('#Left\\ eye #Move\\ area', SVGPathElement, 'left move area path');
+const rightMAPath = strictQuerySelector('#Right\\ eye #Move\\ area', SVGPathElement, 'right move area path');
+const leftIrisPath = strictQuerySelector('#Left\\ eye #Iris', SVGPathElement, 'left iris path');
+const rightIrisPath = strictQuerySelector('#Right\\ eye #Iris', SVGPathElement, 'right iris path');
+const leftEyeCenterG = strictQuerySelector('#Left\\ eye #Eye\\ center', SVGGElement, 'left eye center group');
+const rightEyeCenterG = strictQuerySelector('#Right\\ eye #Eye\\ center', SVGGElement, 'right eye center group');
+
+const leftMACenterR = findSVGPathCenter(leftMAPath);
+const rightMACenterR = findSVGPathCenter(rightMAPath);
+const leftIrisCenterR = findSVGPathCenter(leftIrisPath);
+const rightIrisCenteR = findSVGPathCenter(rightIrisPath);
+
+if (!leftMACenterR || !rightMACenterR || !leftIrisCenterR || !rightIrisCenteR) {
+    throw new Error('Could not find all eye centers');
+}
+
+const leftMACenter = leftMACenterR;
+const rightMACenter = rightMACenterR;
+const leftIrisCenter = leftIrisCenterR;
+const rightIrisCenter = rightIrisCenteR;
+
+const offsetLeft = {
+    x: leftMACenter.x - leftIrisCenter.x,
+    y: leftMACenter.y - leftIrisCenter.y
+};
+const offsetRight = {
+    x: rightMACenter.x - rightIrisCenter.x,
+    y: rightMACenter.y - rightIrisCenter.y
+};
+// Center point between the two eyes
+const center = {
+    x: (leftMACenter.x + rightMACenter.x) / 2,
+    y: (leftMACenter.y + rightMACenter.y) / 2
+};
+const cAngle = getAngle(rightMACenter, leftMACenter);
+// Vector from left to right eye
+const lrVec = {
+    x: rightMACenter.x - leftMACenter.x,
+    y: rightMACenter.y - leftMACenter.y
+};
+// Vector from right to left eye
+const rlVec = {
+    x: leftMACenter.x - rightMACenter.x,
+    y: leftMACenter.y - rightMACenter.y
+};
+// Distance between the two eyes
+const cd = distance(leftMACenter, rightMACenter);
+
+const leftAngleMap = buildAngleMap(leftMAPath, leftMACenter);
+const rightAngleMap = buildAngleMap(rightMAPath, rightMACenter);
+
+/**
+ * Update eye positions based on cursor position
+ * @param {PointLike} cursor
+ */
+function updateEye(cursor) {
+    // Blend region around center line (5% of eye distance)
+    const blendRegion = cd * 0.05;
+
+    // Distance from cursor to each eye center
+    const dl = distance(cursor, leftMACenter);
+    const dr = distance(cursor, rightMACenter);
+
+    const cld = distanceToCenterLine(cursor);
+    const primaryEye = dl < dr ? 'l' : 'r';
+
+    let ltx = 0, lty = 0, rtx = 0, rty = 0;
+    if (cld > blendRegion) {
+        ({ ltx, lty, rtx, rty } = calculateEyeTranslation(cursor, dl, dr, primaryEye));
+    } else {
+        // Blend the movement of both eyes based on distance to center line
+        const blend = cld / blendRegion;
+        const pRes = calculateEyeTranslation(cursor, dl, dr, primaryEye);
+        const sRes = calculateEyeTranslation(cursor, dl, dr, primaryEye === 'l' ? 'r' : 'l');
+
+        ltx = pRes.ltx * blend + sRes.ltx * (1 - blend);
+        lty = pRes.lty * blend + sRes.lty * (1 - blend);
+        rtx = pRes.rtx * blend + sRes.rtx * (1 - blend);
+        rty = pRes.rty * blend + sRes.rty * (1 - blend);
+    }
+
+    leftEyeCenterG.setAttribute('transform', "translate(" + (ltx + offsetLeft.x) + "," + (lty + offsetLeft.y) + ")");
+    rightEyeCenterG.setAttribute('transform', "translate(" + (rtx + offsetRight.x) + "," + (rty + offsetRight.y) + ")");
+}
+
+function calculateEyeTranslation(cursor, dl, dr, primaryEye) {
+    const lAngle = getAngle(leftMACenter, cursor);
+    const lnAngle = (lAngle < 0 ? lAngle + 360 : lAngle) - cAngle;
+    const rAngle = getAngle(rightMACenter, cursor);
+    const rnAngle = (rAngle < 0 ? 360 - (180 + rAngle) : 180 - rAngle) + cAngle;
+
+    const pAngle = primaryEye === 'l' ? lnAngle : rnAngle;
+
+    const minD = Math.min(dl, dr);
+
+    // Instersect ray method mix
+    let im = 1;
+    let inner = false;
+    if (pAngle > 165 && pAngle < 195) {
+        if (pAngle > 175 && pAngle < 185) {
+            im = 0;
+        } else {
+            im = (Math.abs(pAngle - 180) - 5) / 10;
+        }
+        inner = true;
+    }
+    if (pAngle > 340 || pAngle < 20) {
+        if (pAngle > 350 || pAngle < 10) {
+            im = 0;
+        } else {
+            im = (Math.abs(pAngle > 340 ? pAngle - 360 : pAngle) - 10) / 10;
+        }
+    }
+
+    // Left eye boundary point
+    const lBP = projectToPathBoundary(leftAngleMap, leftMACenter, cursor);
+    // Right eye boundary point
+    const rBP = projectToPathBoundary(rightAngleMap, rightMACenter, cursor);
+
+    // Primary MA center
+    const pMAC = primaryEye === 'l' ? leftMACenter : rightMACenter;
+    // Secondary MA center
+    const sMAC = primaryEye === 'l' ? rightMACenter : leftMACenter;
+
+    // Primary-to-secondary eye vector
+    const psVec = primaryEye === 'l' ? rlVec : lrVec;
+    // Primary eye center-to-cursor vector
+    const pcVec = {
+        x: cursor.x - pMAC.x,
+        y: cursor.y - pMAC.y
+    };
+
+    // Primary eye boundary point
+    const pBP = primaryEye === 'l' ? lBP : rBP;
+
+    // Secondary eye boundary point
+    const sBP = primaryEye === 'l' ? rBP : lBP;
+
+    // Secondary eye translate X, Y
+    const stx = sBP.x - sMAC.x;
+    const sty = sBP.y - sMAC.y;
+
+    // Primary boundary translate X, Y
+    let pbtx = pBP.x - pMAC.x;
+    let pbty = pBP.y - pMAC.y;
+
+    // Primary boundary translate fraction
+    let pbtf = 1;
+    if (inner) {
+        // Clamped minimum distance to half the eye distance
+        const cMinD = minD > cd / 2 ? cd / 2 : minD;
+        pbtf = cMinD * 2 / cd;
+        // More natural slow in/out
+        pbtf -= bellCurve(pbtf, 0.2);
+    } else {
+        // Distance units
+        const du = minD / cd + 1;
+        pbtf = 1 - 1 / Math.pow(du, 0.95);
+    }
+    pbtx *= pbtf;
+    pbty *= pbtf;
+
+    // Primary intersection translate X, Y
+    let pitx = pbtx, pity = pbty;
+    if (im > 0) {
+        const ip = intersectRays(sBP, psVec, pMAC, pcVec);
+        if (ip) {
+            pitx = ip.x - pMAC.x;
+            pity = ip.y - pMAC.y;
+        }
+    }
+
+    // Primary eye translate X, Y
+    const ptx = pitx * im + pbtx * (1 - im);
+    const pty = pity * im + pbty * (1 - im);
+
+    return {
+        ltx: primaryEye === 'l' ? ptx : stx,
+        lty: primaryEye === 'l' ? pty : sty,
+        rtx: primaryEye === 'r' ? ptx : stx,
+        rty: primaryEye === 'r' ? pty : sty
+    };
+}
+
+svg.addEventListener('mousemove', function (evt) {
+    const pt = svg.createSVGPoint();
+    pt.x = evt.clientX;
+    pt.y = evt.clientY;
+
+    const screenCTM = svg.getScreenCTM();
+    if (!screenCTM) {
+        return;
+    }
+
+    const cursor = pt.matrixTransform(screenCTM.inverse());
+
+    updateEye(cursor);
+});
+
+function handleTouch(evt) {
+    if (evt.touches.length <= 0) {
+        return;
+    }
+    const touch = evt.touches[0];
+    const pt = svg.createSVGPoint();
+    pt.x = touch.clientX;
+    pt.y = touch.clientY;
+
+    const screenCTM = svg.getScreenCTM();
+    if (!screenCTM) {
+        return;
+    }
+    const cursor = pt.matrixTransform(screenCTM.inverse());
+
+    updateEye(cursor);
+}
+
+svg.addEventListener('touchstart', handleTouch, { passive: true });
+svg.addEventListener('touchmove', handleTouch, { passive: true });
+
+const baseRatio = window.devicePixelRatio;
+
+function getRelativeZoom() {
+  return window.devicePixelRatio / baseRatio;
+}
+
+function resizeAndCenterSVG() {
+    const rz = getRelativeZoom();
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    const size = Math.min(w, h) * 0.5 * rz;
+
+    svg.setAttribute("width", size);
+    svg.setAttribute("height", size);
+    svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+
+    svg.style.position = "absolute";
+    svg.style.left = "50%";
+    svg.style.top = "50%";
+    svg.style.transform = "translate(-50%, -50%)";
+}
+
+resizeAndCenterSVG();
+window.addEventListener("resize", resizeAndCenterSVG);
+
+		]]>	</script>
+</svg>
