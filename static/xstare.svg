@@ -618,36 +618,24 @@ function calculateEyeTranslation(cursor, dl, dr, primaryEye) {
     };
 }
 
-svg.addEventListener('mousemove', function (evt) {
-    const pt = svg.createSVGPoint();
-    pt.x = evt.clientX;
-    pt.y = evt.clientY;
-
-    const screenCTM = svg.getScreenCTM();
-    if (!screenCTM) {
-        return;
-    }
-
-    const cursor = pt.matrixTransform(screenCTM.inverse());
-
+svg.addEventListener("mousemove", function (evt) {
+    const rect = svg.getBoundingClientRect();
+    const cursor = {
+        x: (evt.clientX - rect.left) * (svg.viewBox.baseVal.width / rect.width),
+        y: (evt.clientY - rect.top) * (svg.viewBox.baseVal.height / rect.height),
+    };
     updateEye(cursor);
 });
 
 function handleTouch(evt) {
-    if (evt.touches.length <= 0) {
-        return;
-    }
+    if (evt.touches.length === 0) return;
+
     const touch = evt.touches[0];
-    const pt = svg.createSVGPoint();
-    pt.x = touch.clientX;
-    pt.y = touch.clientY;
-
-    const screenCTM = svg.getScreenCTM();
-    if (!screenCTM) {
-        return;
-    }
-    const cursor = pt.matrixTransform(screenCTM.inverse());
-
+    const rect = svg.getBoundingClientRect();
+    const cursor = {
+        x: (touch.clientX - rect.left) * (svg.viewBox.baseVal.width / rect.width),
+        y: (touch.clientY - rect.top) * (svg.viewBox.baseVal.height / rect.height),
+    };
     updateEye(cursor);
 }
 
