@@ -28,21 +28,27 @@
 		</linearGradient>
 	</defs>
 	<style>
-		.s0 { fill: #c0c6d5;stroke: #7e8aa6;stroke-miterlimit:100;stroke-width: 100 } 
-		.s1 { display: none;fill: none;stroke: #7e8aa6;stroke-miterlimit:100;stroke-width: 100 } 
-		.s2 { fill: #7e8aa6 } 
-		.s3 { fill: #f9f9ae;stroke: #e4dd68;stroke-miterlimit:20;stroke-width: 100 } 
-		.s4 { fill: #c0c6d5 } 
-		.s5 { fill: #ffffff } 
-		.s6 { fill: url(#g1) } 
-		.s7 { fill: #e7fb82 } 
-		.s8 { fill: #f0fdbb } 
-		.s9 { fill: #000000 } 
-		.s10 { opacity: 0;fill: #000000 } 
-		.s11 { fill: #f9f9ae } 
-		.s12 { display: none;fill: none;stroke: #e4dd68;stroke-miterlimit:20;stroke-width: 100 } 
-		.s13 { fill: #e4dd68 } 
-		.s14 { fill: url(#g2) } 
+		.s0 { fill: #c0c6d5;stroke: #7e8aa6;stroke-miterlimit:100;stroke-width: 100 }
+		.s1 { display: none;fill: none;stroke: #7e8aa6;stroke-miterlimit:100;stroke-width: 100 }
+		.s2 { fill: #7e8aa6 }
+		.s3 { fill: #f9f9ae;stroke: #e4dd68;stroke-miterlimit:20;stroke-width: 100 }
+		.s4 { fill: #c0c6d5 }
+		.s5 { fill: #ffffff }
+		.s6 { fill: url(#g1) }
+		.s7 { fill: #e7fb82 }
+		.s8 { fill: #f0fdbb }
+		.s9 { fill: #000000 }
+		.s10 { opacity: 0;fill: #000000 }
+		.s11 { fill: #f9f9ae }
+		.s12 { display: none;fill: none;stroke: #e4dd68;stroke-miterlimit:20;stroke-width: 100 }
+		.s13 { fill: #e4dd68 }
+		.s14 { fill: url(#g2) }
+		svg.scrunch g#Right\ eye\ scrunch,
+		svg.scrunch g#Left\ eye\ scrunch,
+		svg.scrunch g#Snoofa\ scrunch { display: inline!important }
+		svg.scrunch g#Right\ eye,
+		svg.scrunch g#Left\ eye,
+		svg.scrunch g#Snoofa { opacity: 0 }
 	</style>
 	<g id="V">
 		<g id="Body">
@@ -68,6 +74,15 @@
 			<path id="Outline 2" fill-rule="evenodd" class="s2" d="m2291.11 3949.36c-5.98 38.37-8.47 111.61 101.89 142.64-77.47 52.19-215.5-10.6-101.89-142.64z"/>
 			<path id="Outline 1" fill-rule="evenodd" class="s2" d="m2764 3927c16.56 72.53-6.53 118.19-90.14 156.79 139.1 40.88 174-83.77 90.14-156.79z"/>
 		</g>
+		<g id="Snoofa scrunch" style="display: none">
+			<path id="Outline 7" class="s2" d="m2253.58 4294.21c59.77-14.09 71.57 34.77 101.48 30.08 36.99-5.8 34.78-139.5 106.94-153.16 48.71-9.22 97.47 32.17 118.73 74.4 15.18 30.13 26.24 52.48 39.02 52.26 32.61-0.57 46.47-112.55 128.96-111.64 69.49 0.77 60.55 106.06 113.65 99.31l-6.17 31.09c-65.55 5.46-74.74-80.71-112.36-81.23-37.18-0.52-58 120.01-122.21 120.62-41.13 0.39-76.95-33.65-95.99-74.84-17.31-37.46-37.97-59.85-58.09-54.47-30.89 8.27-26 128.64-106.97 143.26-50.15 9.05-54.21-54.43-100.58-45.73z"/>
+			<path id="Outline 6" fill-rule="evenodd" class="s2" d="m2923.01 4197.67c-47.43 68.23-52.6 127.19-25.27 200.43-85.92-43.23-66.61-200.47 25.27-200.43z"/>
+			<path id="Outline 5" fill-rule="evenodd" class="s2" d="m2196.99 4220.32c47.57 70.17 52.98 129.52 26.07 202.06 85.44-40.34 65.5-198.84-26.07-202.06z"/>
+			<path id="Outline 4" fill-rule="evenodd" class="s2" d="m2264.16 3709.92c124.93-118.95 398.21-128.1 529-22-139.96-32.38-325.56-42.18-529 22z"/>
+			<path id="Outline 3" fill-rule="evenodd" class="s2" d="m2393.91 3607.94c38.38-85.87 206.43-86.93 245.38-22.38-67.76-22.94-167.52-22.41-245.38 22.38z"/>
+			<path id="Outline 2" fill-rule="evenodd" class="s2" d="m2291.14 3851.64c-6 38.4-8.5 111.6 101.9 142.6-77.5 52.2-215.5-10.6-101.9-142.6z"/>
+			<path id="Outline 1" fill-rule="evenodd" class="s2" d="m2764.04 3829.34c16.6 72.5-6.5 118.1-90.1 156.7 139.1 40.9 174-83.7 90.1-156.7z"/>
+		</g>
 		<g id="Left eye">
 			<g id="Sclera mask" clip-path="url(#cp1)">
 				<path id="Sclera" fill-rule="evenodd" class="s5" d="m1683.33 3994.99c169.53-20.93 305.32-168.29 380.87-385.27 24.36-69.93 38.08-145.62 47.99-229.13 16.52-139.34 32.84-311.43 8.8-469.7-81.03-533.71-346.89-911.23-710.75-859.24-84.09 12.01-158.14 71.09-220.94 139.8-75.21 82.3-143.4 200.07-179.74 338.48-11.67 44.43-11.2 89.99-18.18 138.59-18.75 130.56-20.01 274.89-0.33 425.16 69.91 533.7 376.78 940.27 692.28 901.31z"/>
@@ -87,6 +102,12 @@
 			<path id="Eyelash 2" fill-rule="evenodd" class="s9" d="m1109.84 2346.86c-500.03-159.54-527.87-78.12-27.62 65.09 11.44-9.88 24.55-52.08 27.62-65.09z"/>
 			<path id="Eyelash 1" fill-rule="evenodd" class="s9" d="m1028.18 2570.94c-437.39 37.06-442.97 126.34-11.38 68.55 2.92-20.18 8.6-53.18 11.38-68.55z"/>
 			<path id="Move area" fill-rule="evenodd" class="s10" d="m1458.44 2233.28c96.37-1.68 211.89 66.84 313.36 210.54 101.49 143.72 181.15 354.24 205.44 589.03v0.01c24.38 235.5-12.28 446.88-81.56 589.16-69.27 142.27-156.75 206.82-253.8 208.29h-0.02-0.02c-96.98 1.51-212.85-67.79-314.33-212.45-101.48-144.66-180.77-356.2-204.41-591.36v-0.01-0.01c-23.6-234.45 13.38-444.48 82.57-585.87 69.19-141.37 156.44-205.6 252.77-207.33z"/>
+		</g>
+		<g id="Left eye scrunch" style="display: none">
+			<path id="Outline 4" class="s9" d="m453.78 2916.84c126.96 30.2 443.59 93.5 562.83 116.01h0.05l0.04 0.01c70.03 10.89 284.34 36.6 513.26 112.22 189.25 62.51 379.17 164.12 514.4 298.41 99.16 98.46 140.53 81.89 125.56 7.27-33.06-164.84-59.69-351.63-58.93-432.7-29.21 112.97-35.31 189.44 1.76 383.47-142.73-162.95-357.26-264.76-558.12-331.11-237.35-78.4-460.07-106.89-525.75-117.1l-0.09-0.01c-122.29-19.28-395.35-65.63-575.01-36.47z"/>
+			<path id="Outline 3" fill-rule="evenodd" class="s9" d="m970.17 2981.74c-70.07-83.05-226.75-236.67-278.71-281.47 105.8 20.51 338.09 236.19 363.83 274.5-39.11 0.74-52.76 3.92-85.12 6.97z"/>
+			<path id="Outline 2" fill-rule="evenodd" class="s9" d="m1250.33 2998.05c-28.75-104.79-116.57-328.08-144.94-390.55 87.43 63.01 215.97 367.07 223.27 412.65-35.82-15.74-47.68-11.29-78.33-22.1z"/>
+			<path id="Outline 1" fill-rule="evenodd" class="s9" d="m1551.4 3706.97c95.8-80.73 475.68-213.36 492.23-145.36 3.16 12.97-15.43 30.05-32.77 31.94-111.98 12.2-311.49 62.43-459.46 113.42z"/>
 		</g>
 		<g id="Mane front">
 			<path id="BG" class="s11" d="m3960.01 1674.48c0 0-218.54-174.6-369.71-113.57-99.56 40.2-447.17 952.98-1396.65 1096.61 0 0 468.04-357.59 575.39-769.45-683.08 266.44-1229.07 126.82-2325.86 1182 0 0-328.5-1157.86 754.25-2046.56 0 0-275.46 44.72-595.87 191.96 495.59-693.26 2434.89-1296.93 3426.36 39.24z"/>
@@ -122,6 +143,13 @@
 			<path id="Eyelash 1" fill-rule="evenodd" class="s9" d="m4050.95 2529.93c454.06 21.9 460.1 116.55 13.05 72.07-3.39-21.2-9.88-55.89-13.05-72.07z"/>
 			<path id="Move area" fill-rule="evenodd" class="s10" d="m3601.04 2180.5c92.53-0.34 182.08 63.06 255.85 206.87 73.77 143.81 117.63 358.25 102.35 598.21-15.27 239.91-86.23 456.36-180.89 604.76-94.65 148.4-204.58 219.05-297.15 219.36h-0.02-0.02c-92.52 0.34-182.08-63.06-255.85-206.87-73.77-143.81-117.62-358.25-102.35-598.21 15.27-239.91 86.23-456.33 180.88-604.72 94.66-148.39 204.6-219.06 297.2-219.4z"/>
 		</g>
+		<g id="Right eye scrunch" style="display: none">
+			<path id="Outline 4" class="s9" d="m4586.36 2858.23c-126.83 31.56-443.28 98.22-562.47 121.99h-0.05l-0.03 0.01c-70.02 11.62-284.39 39.55-512.87 117.69-188.89 64.59-378.06 168.41-512.14 304.46-98.31 99.75-139.91 83.54-125.67 8.54 31.46-165.66 56.26-353.29 54.68-434.6 30.39 113.03 37.27 189.67 2.08 384.65 141.3-164.86 355.11-269.12 555.6-337.68 236.9-81.02 459.65-111.83 525.33-122.72l0.08-0.01c122.27-20.56 395.26-69.78 575.46-42.33z"/>
+			<path id="Outline 3" fill-rule="evenodd" class="s9" d="m4069.89 2928.49c69.34-84.01 224.69-239.65 276.28-285.11-105.74 21.63-336.2 240.29-361.59 278.97 39.17 0.36 52.87 3.41 85.31 6.14z"/>
+			<path id="Outline 2" fill-rule="evenodd" class="s9" d="m3789.5 2947.65c27.74-105.4 113.44-330.24 141.22-393.18-86.91 64.07-212.6 370.34-219.44 416.13 35.7-16.14 47.63-11.8 78.22-22.95z"/>
+			<path id="Outline 1" fill-rule="evenodd" class="s9" d="m3495.1 3661.72c-96.75-80.01-478.5-209.24-494.39-140.87-3.03 13.04 15.76 29.99 33.14 31.71 112.27 11.11 312.56 59.5 461.25 109.16z"/>
+		</g>
+		<path id="Boop area" fill-rule="evenodd" class="s10" d="m2545 4323c-225.07 0-407-145.05-407-324.5 0-179.45 181.93-324.5 407-324.5 225.07 0 407 145.05 407 324.5 0 179.45-181.93 324.5-407 324.5z"/>
 	</g>
 	<script><![CDATA[
 /**
@@ -416,6 +444,7 @@ function distanceToCenterLine(cursor) {
 
 const svg = strictQuerySelector('svg', SVGSVGElement, 'SVG element');
 
+const boopArea = strictQuerySelector('#Boop\\ area', SVGPathElement, 'boop area path');
 const leftMAPath = strictQuerySelector('#Left\\ eye #Move\\ area', SVGPathElement, 'left move area path');
 const rightMAPath = strictQuerySelector('#Right\\ eye #Move\\ area', SVGPathElement, 'right move area path');
 const leftIrisPath = strictQuerySelector('#Left\\ eye #Iris', SVGPathElement, 'left iris path');
@@ -629,6 +658,20 @@ function handleTouch(evt) {
 
 svg.addEventListener('touchstart', handleTouch, { passive: true });
 svg.addEventListener('touchmove', handleTouch, { passive: true });
+
+let scrunchTimeout = null;
+boopArea.addEventListener('pointerdown', (evt) => {
+    evt.preventDefault();
+    if (scrunchTimeout) {
+        clearTimeout(scrunchTimeout);
+        scrunchTimeout = null;
+    }
+    svg.classList.add('scrunch');
+    scrunchTimeout = setTimeout(() => {
+        svg.classList.remove('scrunch');
+        scrunchTimeout = null;
+    }, 650);
+});
 
 const baseRatio = window.devicePixelRatio;
 
