@@ -524,8 +524,17 @@ const cd = distance(leftMACenter, rightMACenter);
 const leftAngleMap = buildAngleMap(leftMAPath, leftMACenter);
 const rightAngleMap = buildAngleMap(rightMAPath, rightMACenter);
 
+/** @type {PointLike} */
+const leftCurrent = { x: 0, y: 0 };
+/** @type {PointLike} */
+const rightCurrent = { x: 0, y: 0 };
+/** @type {PointLike} */
+const leftTarget = { x: 0, y: 0 };
+/** @type {PointLike} */
+const rightTarget = { x: 0, y: 0 };
+
 /**
- * Update eye positions based on cursor position
+ * Update eye targets based on cursor position
  * @param {PointLike} cursor
  */
 function updateEye(cursor) {
@@ -559,11 +568,21 @@ function updateEye(cursor) {
     const lyDerp = 250
     const rxDerp = 250;
     const ryDerp = -150;
-
-    leftEyeCenterG.setAttribute('transform', "translate(" + (ltx + offsetLeft.x + lxDerp) + "," + (lty + offsetLeft.y + lyDerp) + ")");
-    rightEyeCenterG.setAttribute('transform', "translate(" + (rtx + offsetRight.x + rxDerp) + "," + (rty + offsetRight.y + ryDerp) + ")");
+    
+    leftTarget.x = ltx + lxDerp;
+    leftTarget.y = lty + lyDerp;
+    rightTarget.x = rtx + rxDerp;
+    rightTarget.y = rty + ryDerp;
 }
 
+/**
+ * Calculate eye translation based on cursor position and primary eye
+ * @param {PointLike} cursor Cursor position
+ * @param {number} dl Distance from cursor to left eye center
+ * @param {number} dr Distance from cursor to right eye center
+ * @param {'l' | 'r'} primaryEye Primary eye ('l' for left, 'r' for right)
+ * @returns {{ ltx: number, lty: number, rtx: number, rty: number }} Translation for left and right eyes
+ */
 function calculateEyeTranslation(cursor, dl, dr, primaryEye) {
     const lAngle = getAngle(leftMACenter, cursor);
     const lnAngle = (lAngle < 0 ? lAngle + 360 : lAngle) - cAngle;
@@ -663,6 +682,49 @@ function calculateEyeTranslation(cursor, dl, dr, primaryEye) {
     };
 }
 
+/* Linear interpolation
+ * @param {number} a Start value
+ * @param {number} b End value
+ * @param {number} t Interpolation factor [0, 1]
+ * @returns {number} Interpolated value
+ */
+function lerp(a, b, t) {
+  return a + (b - a) * t;
+}
+
+let lastTime = 0;
+/**
+ * Animation frame handler
+ * @param {number} now Current time in milliseconds
+ */
+function onAnimationFrame(now) {
+    const delta = now - lastTime;
+    
+    const ld = distance(leftCurrent, leftTarget);
+    const rd = distance(rightCurrent, rightTarget);
+    const md = Math.max(ld, rd);
+
+    const fastBase = 0.85; // snappy when close
+    const slowBase = 0.15; // gentle when far away
+    const distThreshold = cd * 0.5; // half eye distance
+    
+    const jumpFactor = Math.min(md / distThreshold, 1);
+    const adaptiveBase = fastBase * (1 - jumpFactor) + slowBase * jumpFactor;
+    const smoothing = 1 - Math.pow(1 - adaptiveBase, delta / 16.7);
+
+    leftCurrent.x = lerp(leftCurrent.x, leftTarget.x, smoothing);
+    leftCurrent.y = lerp(leftCurrent.y, leftTarget.y, smoothing);
+
+    rightCurrent.x = lerp(rightCurrent.x, rightTarget.x, smoothing);
+    rightCurrent.y = lerp(rightCurrent.y, rightTarget.y, smoothing);
+
+    leftEyeCenterG.setAttribute('transform', "translate(" + (leftCurrent.x + offsetLeft.x) + "," + (leftCurrent.y + offsetLeft.y) + ")");
+    rightEyeCenterG.setAttribute('transform', "translate(" + (rightCurrent.x + offsetRight.x) + "," + (rightCurrent.y + offsetRight.y) + ")");
+    lastTime = now;
+    requestAnimationFrame(onAnimationFrame);
+}
+requestAnimationFrame(onAnimationFrame);
+
 svg.addEventListener("mousemove", function (evt) {
     const rect = svg.getBoundingClientRect();
     const cursor = {
@@ -672,6 +734,10 @@ svg.addEventListener("mousemove", function (evt) {
     updateEye(cursor);
 });
 
+/**
+ * Touch event handler
+ * @param {TouchEvent} evt
+ */
 function handleTouch(evt) {
     if (evt.touches.length === 0) return;
 
@@ -690,6 +756,10 @@ svg.addEventListener('touchmove', handleTouch, { passive: true });
 /** @type {number | null} */
 let volumebarTimeout = null;
 
+/**
+ * Update "volume bar" UI in the ears
+ * @param {number} newVolume Volume level [0, 1]
+ */
 function updateVolumeBar(newVolume) {
     if (volumebarTimeout) {
         clearTimeout(volumebarTimeout);
