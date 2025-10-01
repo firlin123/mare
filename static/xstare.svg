@@ -200,137 +200,296 @@
  */
 
 /**
- * Find the center point of an SVG path
- * @param {SVGPathElement} path
+ * ==================================================
+ * GLOBALS & CONSTANTS
+ * ==================================================
  */
-function findSVGPathCenter(path) {
-    const length = path.getTotalLength();
 
+const PONY_ID = 'minuette';
+const SVG = strictQuerySelector('svg', SVGSVGElement, 'SVG element');
+
+// --- Paths and Elements ---
+const BOOP_PATH = strictQuerySelector('#Boop\\ area', SVGPathElement, 'boop area path');
+const LEFT_EAR_VOLUME_AREA = strictQuerySelector('#Left\\ ear #Volume\\ control\\ area', SVGPathElement, 'left volume control area path');
+const RIGHT_EAR_VOLUME_AREA = strictQuerySelector('#Right\\ ear #Volume\\ control\\ area', SVGPathElement, 'right volume control area path');
+const LEFT_VOLUME_GRADIENT_STOP1 = strictQuerySelector('#g3 stop + stop', SVGStopElement, 'left gradient stop 1');
+const LEFT_VOLUME_GRADIENT_STOP2 = strictQuerySelector('#g3 stop + stop + stop', SVGStopElement, 'left gradient stop 2');
+const RIGHT_VOLUME_GRADIENT_STOP1 = strictQuerySelector('#g1 stop + stop', SVGStopElement, 'right gradient stop 1');
+const RIGHT_VOLUME_GRADIENT_STOP2 = strictQuerySelector('#g1 stop + stop + stop', SVGStopElement, 'right gradient stop 2');
+const LEFT_EYE_MOVE_AREA = strictQuerySelector('#Left\\ eye #Move\\ area', SVGPathElement, 'left move area path');
+const RIGHT_EYE_MOVE_AREA = strictQuerySelector('#Right\\ eye #Move\\ area', SVGPathElement, 'right move area path');
+const LEFT_IRIS_PATH = strictQuerySelector('#Left\\ eye #Iris', SVGPathElement, 'left iris path');
+const RIGHT_IRIS_PATH = strictQuerySelector('#Right\\ eye #Iris', SVGPathElement, 'right iris path');
+const LEFT_EYE_GROUP = strictQuerySelector('#Left\\ eye #Eye\\ center', SVGGElement, 'left eye center group');
+const RIGHT_EYE_GROUP = strictQuerySelector('#Right\\ eye #Eye\\ center', SVGGElement, 'right eye center group');
+
+// --- Eye Geometry ---
+const LEFT_MOVE_CENTER_R = findPathCenter(LEFT_EYE_MOVE_AREA);
+const RIGHT_MOVE_CENTER_R = findPathCenter(RIGHT_EYE_MOVE_AREA);
+const LEFT_IRIS_CENTER_R = findPathCenter(LEFT_IRIS_PATH);
+const RIGHT_IRIS_CENTER_R = findPathCenter(RIGHT_IRIS_PATH);
+
+if (!LEFT_MOVE_CENTER_R || !RIGHT_MOVE_CENTER_R || !LEFT_IRIS_CENTER_R || !RIGHT_IRIS_CENTER_R) {
+    throw new Error('Could not find all eye centers');
+}
+
+const LEFT_MOVE_CENTER = LEFT_MOVE_CENTER_R;
+const RIGHT_MOVE_CENTER = RIGHT_MOVE_CENTER_R;
+const LEFT_IRIS_CENTER = LEFT_IRIS_CENTER_R;
+const RIGHT_IRIS_CENTER = RIGHT_IRIS_CENTER_R;
+
+/** @type {PointLike} */
+const OFFSET_LEFT_EYE = {
+    x: LEFT_MOVE_CENTER.x - LEFT_IRIS_CENTER.x,
+    y: LEFT_MOVE_CENTER.y - LEFT_IRIS_CENTER.y
+};
+/** @type {PointLike} */
+const OFFSET_RIGHT_EYE = {
+    x: RIGHT_MOVE_CENTER.x - RIGHT_IRIS_CENTER.x,
+    y: RIGHT_MOVE_CENTER.y - RIGHT_IRIS_CENTER.y
+};
+/** @type {PointLike} */
+const MIDPOINT_BETWEEN_EYES = {
+    x: (LEFT_MOVE_CENTER.x + RIGHT_MOVE_CENTER.x) / 2,
+    y: (LEFT_MOVE_CENTER.y + RIGHT_MOVE_CENTER.y) / 2
+};
+/** @type {PointLike} */
+const LEFT_RIGHT_VECTOR = {
+    x: RIGHT_MOVE_CENTER.x - LEFT_MOVE_CENTER.x,
+    y: RIGHT_MOVE_CENTER.y - LEFT_MOVE_CENTER.y
+};
+/** @type {PointLike} */
+const RIGHT_LEFT_VECTOR = {
+    x: LEFT_MOVE_CENTER.x - RIGHT_MOVE_CENTER.x,
+    y: LEFT_MOVE_CENTER.y - RIGHT_MOVE_CENTER.y
+};
+
+const EYE_DISTANCE = getDistance(LEFT_MOVE_CENTER, RIGHT_MOVE_CENTER);
+const CENTER_ANGLE = getAngle(RIGHT_MOVE_CENTER, LEFT_MOVE_CENTER);
+
+const LEFT_EYE_ANGLE_MAP = buildAngleMap(LEFT_EYE_MOVE_AREA, LEFT_MOVE_CENTER);
+const RIGHT_EYE_ANGLE_MAP = buildAngleMap(RIGHT_EYE_MOVE_AREA, RIGHT_MOVE_CENTER);
+
+// --- Eye state ---
+/** @type {PointLike} */
+const leftEyeCurrent = { x: 0, y: 0 };
+/** @type {PointLike} */
+const rightEyeCurrent = { x: 0, y: 0 };
+/** @type {PointLike} */
+const leftEyeTarget = { x: 0, y: 0 };
+/** @type {PointLike} */
+const rightEyeTarget = { x: 0, y: 0 };
+
+let lastTime = 0;
+/** @type {number | null} */
+let scrunchTimeout = null;
+/** @type {number | null} */
+let volumeBarTimeout = null;
+
+// --- Audio globals ---
+/** @type {AudioBuffer | null} */
+let loadedBoop = null;
+const audioCtx = new (window.AudioContext || (/** @type {any} */ (window)).webkitAudioContext)();
+let currentVolume = parseFloat(localStorage.getItem(`xstare_${PONY_ID}_volume`) || '0.5');
+currentVolume = isNaN(currentVolume) ? 0.5 : Math.max(0, Math.min(1, currentVolume));
+
+/** @type {GainNode} */
+const gainNode = audioCtx.createGain();
+gainNode.gain.value = currentVolume;
+gainNode.connect(audioCtx.destination);
+
+const BASE_RATIO = window.devicePixelRatio;
+
+/**
+ * ==================================================
+ * HELPER FUNCTIONS (Math & DOM)
+ * ==================================================
+ */
+
+/**
+ * Strict version of querySelector that checks type and existence
+ * @template {Element} T
+ * @param {string} selector
+ * @param {new (...args:any[]) => T} type
+ * @param {string} name
+ * @returns {T}
+ */
+function strictQuerySelector(selector, type, name) {
+    const el = document.querySelector(selector);
+    if (!el) {
+        throw new Error('Could not find ' + name + ' element (' + selector + ')');
+    }
+    if (!(el instanceof type)) {
+        throw new Error('Element ' + name + ' (' + selector + ') is not of type ' + type.name);
+    }
+    return el;
+}
+
+/**
+ * Euclidean distance between two points
+ * @param {PointLike} a
+ * @param {PointLike} b
+ * @returns {number}
+ */
+function getDistance(a, b) {
+    return Math.hypot(a.x - b.x, a.y - b.y);
+}
+
+/**
+ * Angle (degrees) of point relative to center
+ * @param {PointLike} pt
+ * @param {PointLike} center
+ * @returns {number}
+ */
+function getAngle(pt, center) {
+    return Math.atan2(pt.y - center.y, pt.x - center.x) * 180 / Math.PI;
+}
+
+/**
+ * Linear interpolation
+ * @param {number} a
+ * @param {number} b
+ * @param {number} t [0,1]
+ */
+function getLerp(a, b, t) {
+    return a + (b - a) * t;
+}
+
+
+/**
+ * Find approximate "center" of a path by intersecting lines between quarter points
+ * @param {SVGPathElement} path
+ * @returns {PointLike|null}
+ */
+function findPathCenter(path) {
+    const length = path.getTotalLength();
     const p00 = path.getPointAtLength(0);
     const p25 = path.getPointAtLength(length * 0.25);
     const p50 = path.getPointAtLength(length * 0.5);
     const p75 = path.getPointAtLength(length * 0.75);
-
     return getIntersection(p00, p50, p25, p75);
 }
 
 /**
- * Get intersection point of two line segments
- * @param {PointLike} l1s start of line 1
- * @param {PointLike} l1e end of line 1
- * @param {PointLike} l2s start of line 2
- * @param {PointLike} l2e end of line 2
- * @return {PointLike | null} intersection point or null if line segments do not intersect
+ * Find intersection between two line segments
+ * @param {PointLike} l1s
+ * @param {PointLike} l1e
+ * @param {PointLike} l2s
+ * @param {PointLike} l2e
+ * @returns {PointLike|null}
  */
 function getIntersection(l1s, l1e, l2s, l2e) {
-    const x1 = l1s.x, y1 = l1s.y;
-    const x2 = l1e.x, y2 = l1e.y;
-    const x3 = l2s.x, y3 = l2s.y;
-    const x4 = l2e.x, y4 = l2e.y;
-
-    // Compute denominators
-    const denom = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
-
-    if (denom === 0) {
-        // lines are parallel or coincident
-        return null;
-    }
-
+    const denom = (l1e.x - l1s.x) * (l2e.y - l2s.y) - (l1e.y - l1s.y) * (l2e.x - l2s.x);
+    if (denom === 0) return null;
     const px =
-        ((x1 * y2 - y1 * x2) * (x3 - x4) -
-            (x1 - x2) * (x3 * y4 - y3 * x4)) /
+        ((l1s.x * l1e.y - l1s.y * l1e.x) * (l2s.x - l2e.x) -
+            (l1s.x - l1e.x) * (l2s.x * l2e.y - l2s.y * l2e.x)) /
         denom;
     const py =
-        ((x1 * y2 - y1 * x2) * (y3 - y4) -
-            (y1 - y2) * (x3 * y4 - y3 * x4)) /
+        ((l1s.x * l1e.y - l1s.y * l1e.x) * (l2s.y - l2e.y) -
+            (l1s.y - l1e.y) * (l2s.x * l2e.y - l2s.y * l2e.x)) /
         denom;
-
     if (
-        px < Math.min(x1, x2) - 1e-6 ||
-        px > Math.max(x1, x2) + 1e-6 ||
-        px < Math.min(x3, x4) - 1e-6 ||
-        px > Math.max(x3, x4) + 1e-6 ||
-        py < Math.min(y1, y2) - 1e-6 ||
-        py > Math.max(y1, y2) + 1e-6 ||
-        py < Math.min(y3, y4) - 1e-6 ||
-        py > Math.max(y3, y4) + 1e-6
+        px < Math.min(l1s.x, l1e.x) - 1e-6 ||
+        px > Math.max(l1s.x, l1e.x) + 1e-6 ||
+        px < Math.min(l2s.x, l2e.x) - 1e-6 ||
+        px > Math.max(l2s.x, l2e.x) + 1e-6 ||
+        py < Math.min(l1s.y, l1e.y) - 1e-6 ||
+        py > Math.max(l1s.y, l1e.y) + 1e-6 ||
+        py < Math.min(l2s.y, l2e.y) - 1e-6 ||
+        py > Math.max(l2s.y, l2e.y) + 1e-6
     ) {
-        return null; // Intersection outside segment bounds
+        return null;
     }
-
     return { x: px, y: py };
 }
 
 /**
- * Get angle of point relative to center
- * @param {PointLike} pt
- * @param {PointLike} center
- * @returns {number} Angle in degrees [-180, 180]
+ * Find intersection between two rays (infinite lines in one direction)
+ * @param {PointLike} r1b
+ * @param {PointLike} r1v
+ * @param {PointLike} r2b
+ * @param {PointLike} r2v
+ * @returns {PointLike|null}
  */
-function getAngle(pt, center) {
-    const dx = pt.x - center.x;
-    const dy = pt.y - center.y;
-    return Math.atan2(dy, dx) * 180 / Math.PI;
+function intersectRays(r1b, r1v, r2b, r2v) {
+    const cross = r1v.x * r2v.y - r1v.y * r2v.x;
+    if (Math.abs(cross) < 1e-10) {
+        return null;
+    }
+
+    const dx = r2b.x - r1b.x;
+    const dy = r2b.y - r1b.y;
+    const t1 = (dx * r2v.y - dy * r2v.x) / cross;
+    const t2 = (dx * r1v.y - dy * r1v.x) / cross;
+
+    if (t1 < 0 || t2 < 0) {
+        return null;
+    }
+
+    return {
+        x: r1b.x + t1 * r1v.x,
+        y: r1b.y + t1 * r1v.y
+    };
 }
 
 /**
- * Build a lookup map for fast angle -> boundary interpolation
+ * Build lookup table mapping angles → path boundary
  * @param {SVGPathElement} path
  * @param {PointLike} center
- * @returns {{ [k: number]: {point:[number,number,number], next:[number,number,number]}}}
+ * @returns {{[k:number]: {point:[number,number,number], next:[number,number,number]}}}
  */
 function buildAngleMap(path, center) {
     /** @type {{ [k: number]: [number,number,number] }} */
     const points = {};
     const length = path.getTotalLength();
-    let stepLength = length / 720;
+    let step = length / 720;
     let curr = 0;
     let angle = getAngle(path.getPointAtLength(0), center);
     let angleKey = Math.round(angle * 2); // 0.5° resolution
-    const startAngleKey = angleKey;
+    const startKey = angleKey;
     let noAdvance = 0;
+
     while (true) {
-        let next = curr + stepLength;
+        if (noAdvance > 20) {
+            console.warn('buildAngleMap: No progress after 20 attempts, stopping');
+            throw new Error('buildAngleMap: No progress after 20 attempts, stopping');
+        }
+
+        let next = curr + step;
         if (next > length) {
             next -= length;
         }
         const pt = path.getPointAtLength(next);
         const nextAngle = getAngle(pt, center);
-        const nextAngleKey = Math.round(nextAngle * 2);
-        if (nextAngleKey === angleKey) {
-            // if we didn't advance to the next angle key, the step is too small.
-            // Increase and try again
-            stepLength *= 1.5;
+        const nextKey = Math.round(nextAngle * 2);
+
+        if (nextKey === angleKey) {
+            step *= 1.5;
             noAdvance++;
-        } else if (nextAngleKey !== angleKey + 1) {
-            // If we skipped at least one angle key, the step is too large.
-            // Decrease and try again
-            stepLength /= 1.5;
+            continue;
+        } else if (nextKey !== angleKey + 1) {
+            step /= 1.5;
             noAdvance++;
-        } else {
-            // Valid step, store and continue
-            /** @type {[number,number,number]} */
-            const point = [angle, pt.x, pt.y];
-            if (angleKey === -360) {
-                points[360] = point;
-            }
-            points[angleKey] = point;
-            curr = next;
-            angle = nextAngle;
-            angleKey = nextAngleKey;
-            noAdvance = 0;
-            if (angleKey === startAngleKey) {
-                // Completed full circle
-                break;
-            }
-            if (angleKey === 360) {
-                angleKey = -360;
-            }
+            continue;
         }
-        if (noAdvance > 20) {
-            // Something is wrong, we are not making progress
-            console.warn('buildAngleMap: No progress after 20 attempts, stopping');
-            throw new Error('buildAngleMap: No progress after 20 attempts, stopping');
+
+        /** @type {[number,number,number]} */
+        const point = [angle, pt.x, pt.y];
+        if (angleKey === -360) {
+            points[360] = point;
+        }
+        points[angleKey] = point;
+        curr = next;
+        angle = nextAngle;
+        angleKey = nextKey;
+        noAdvance = 0;
+        if (angleKey === startKey) {
+            // Completed full circle
+            break;
+        }
+        if (angleKey === 360) {
+            angleKey = -360;
         }
     }
 
@@ -344,11 +503,11 @@ function buildAngleMap(path, center) {
 }
 
 /**
- * Project a point to the boundary of a path
- * @param {{ [k: number]: {point:[number,number,number], next:[number,number,number]}}} angleMap Angle map from buildAngleMap
- * @param {PointLike} center Center point of the path
- * @param {PointLike} cursor Point to project
- * @returns {PointLike} Projected point on the path boundary
+ * Project cursor onto a path boundary
+ * @param {{ [k: number]: {point:[number,number,number], next:[number,number,number]}}} angleMap
+ * @param {PointLike} center
+ * @param {PointLike} cursor
+ * @returns {PointLike}
  */
 function projectToPathBoundary(angleMap, center, cursor) {
     let cursorA = getAngle(cursor, center);
@@ -357,7 +516,7 @@ function projectToPathBoundary(angleMap, center, cursor) {
 
     if (!entry) {
         console.warn('projectToPathBoundary: No entry for angle', cursorA, angleKey);
-        return { x: center.x, y: center.y };
+        return center;
     }
 
     let pointA = entry.point[0];
@@ -391,457 +550,210 @@ function projectToPathBoundary(angleMap, center, cursor) {
 }
 
 /**
- * Get intersection point of two rays.
- * @param {PointLike} r1b Ray 1 base point
- * @param {PointLike} r1v Ray 1 direction vector
- * @param {PointLike} r2b Ray 2 base point
- * @param {PointLike} r2v Ray 2 direction vector
- * @returns {PointLike | null} Intersection point or null if rays are parallel or don't intersect
- */
-function intersectRays(r1b, r1v, r2b, r2v) {
-    const cross = r1v.x * r2v.y - r1v.y * r2v.x;
-    if (Math.abs(cross) < 1e-10) {
-        // No intersection or infinite intersections.
-        return null;
-    }
-
-    // Parameters for the intersection
-    const dx = r2b.x - r1b.x;
-    const dy = r2b.y - r1b.y;
-
-    const t1 = (dx * r2v.y - dy * r2v.x) / cross;
-    const t2 = (dx * r1v.y - dy * r1v.x) / cross;
-
-    // Check if intersection is in the forward direction of both rays
-    if (t1 < 0 || t2 < 0) {
-        // Intersection exists but not in the forward direction of both rays
-        return null;
-    }
-
-    // Calculate intersection point
-    return {
-        x: r1b.x + t1 * r1v.x,
-        y: r1b.y + t1 * r1v.y
-    };
-}
-
-/**
- * Strict version of querySelector that checks for null and type
- * @template T
- * @param {string} selector CSS selector
- * @param {new (...args: any[]) => T} type Expected type of the element
- * @param {string} nickName Nickname for error messages
- * @returns {T}
- */
-function strictQuerySelector(selector, type, nickName) {
-    const el = document.querySelector(selector);
-    if (!el) {
-        throw new Error("Could not find " + nickName + " element (" + selector + ")");
-    }
-    if (!(el instanceof type)) {
-        throw new Error("Element " + nickName + " (" + selector + ") is not of type " + type.name);
-    }
-    return el;
-}
-
-/**
- * Calculate distance between two points
- * @param {PointLike} a
- * @param {PointLike} b
+ * Bell‑shaped easing curve
+ * @param {number} x [0,1]
+ * @param {number} maxY
  * @returns {number}
- */
-function distance(a, b) {
-    const dx = a.x - b.x;
-    const dy = a.y - b.y;
-    return Math.sqrt(dx * dx + dy * dy);
-}
-
-/**
- * Bell curve function
- * @param {number} x Input [0, 1]
- * @param {number} maxY Maximum output value
- * @return {number} Output [0, maxY]
  */
 function bellCurve(x, maxY) {
     return (maxY * Math.sin(Math.PI * (x * 2 - 0.5)) + maxY) / 2;
 }
 
 /**
- * Calculate the length from a point to the center line between the two eyes
+ * Distance from cursor to the line between left and right eyes
  * @param {PointLike} cursor
  * @returns {number}
  */
 function distanceToCenterLine(cursor) {
-    const numerator = (center.x - cursor.x) * lrVec.x + (center.y - cursor.y) * lrVec.y;
-    const denominator = lrVec.x * lrVec.x + lrVec.y * lrVec.y;
-    const ps = numerator / denominator;
-    const curP = {
-        x: cursor.x + ps * lrVec.x,
-        y: cursor.y + ps * lrVec.y,
+    const num = (MIDPOINT_BETWEEN_EYES.x - cursor.x) * LEFT_RIGHT_VECTOR.x + (MIDPOINT_BETWEEN_EYES.y - cursor.y) * LEFT_RIGHT_VECTOR.y;
+    const denom = LEFT_RIGHT_VECTOR.x * LEFT_RIGHT_VECTOR.x + LEFT_RIGHT_VECTOR.y * LEFT_RIGHT_VECTOR.y;
+    const ps = num / denom;
+    /** @type {PointLike} */
+    const proj = {
+        x: cursor.x + ps * LEFT_RIGHT_VECTOR.x,
+        y: cursor.y + ps * LEFT_RIGHT_VECTOR.y,
     };
-    const curLen = Math.sqrt((curP.x - cursor.x) ** 2 + (curP.y - cursor.y) ** 2);
-    return curLen;
+    return getDistance(proj, cursor);
 }
-
-const svg = strictQuerySelector('svg', SVGSVGElement, 'SVG element');
-
-const boopArea = strictQuerySelector('#Boop\\ area', SVGPathElement, 'boop area path');
-const leftVCArea = strictQuerySelector('#Left\\ ear #Volume\\ control\\ area', SVGPathElement, 'left volume control area path');
-const rightVCArea = strictQuerySelector('#Right\\ ear #Volume\\ control\\ area', SVGPathElement, 'right volume control area path');
-const leftGradS1 = strictQuerySelector('#g3 stop + stop', SVGStopElement, 'left gradient stop 1');
-const leftGradS2 = strictQuerySelector('#g3 stop + stop + stop', SVGStopElement, 'left gradient stop 2');
-const rightGradS1 = strictQuerySelector('#g1 stop + stop', SVGStopElement, 'right gradient stop 1');
-const rightGradS2 = strictQuerySelector('#g1 stop + stop + stop', SVGStopElement, 'right gradient stop 2');
-const leftMAPath = strictQuerySelector('#Left\\ eye #Move\\ area', SVGPathElement, 'left move area path');
-const rightMAPath = strictQuerySelector('#Right\\ eye #Move\\ area', SVGPathElement, 'right move area path');
-const leftIrisPath = strictQuerySelector('#Left\\ eye #Iris', SVGPathElement, 'left iris path');
-const rightIrisPath = strictQuerySelector('#Right\\ eye #Iris', SVGPathElement, 'right iris path');
-const leftEyeCenterG = strictQuerySelector('#Left\\ eye #Eye\\ center', SVGGElement, 'left eye center group');
-const rightEyeCenterG = strictQuerySelector('#Right\\ eye #Eye\\ center', SVGGElement, 'right eye center group');
-
-const leftMACenterR = findSVGPathCenter(leftMAPath);
-const rightMACenterR = findSVGPathCenter(rightMAPath);
-const leftIrisCenterR = findSVGPathCenter(leftIrisPath);
-const rightIrisCenteR = findSVGPathCenter(rightIrisPath);
-
-if (!leftMACenterR || !rightMACenterR || !leftIrisCenterR || !rightIrisCenteR) {
-    throw new Error('Could not find all eye centers');
-}
-
-const leftMACenter = leftMACenterR;
-const rightMACenter = rightMACenterR;
-const leftIrisCenter = leftIrisCenterR;
-const rightIrisCenter = rightIrisCenteR;
-
-const offsetLeft = {
-    x: leftMACenter.x - leftIrisCenter.x,
-    y: leftMACenter.y - leftIrisCenter.y
-};
-const offsetRight = {
-    x: rightMACenter.x - rightIrisCenter.x,
-    y: rightMACenter.y - rightIrisCenter.y
-};
-// Center point between the two eyes
-const center = {
-    x: (leftMACenter.x + rightMACenter.x) / 2,
-    y: (leftMACenter.y + rightMACenter.y) / 2
-};
-const cAngle = getAngle(rightMACenter, leftMACenter);
-// Vector from left to right eye
-const lrVec = {
-    x: rightMACenter.x - leftMACenter.x,
-    y: rightMACenter.y - leftMACenter.y
-};
-// Vector from right to left eye
-const rlVec = {
-    x: leftMACenter.x - rightMACenter.x,
-    y: leftMACenter.y - rightMACenter.y
-};
-// Distance between the two eyes
-const cd = distance(leftMACenter, rightMACenter);
-
-const leftAngleMap = buildAngleMap(leftMAPath, leftMACenter);
-const rightAngleMap = buildAngleMap(rightMAPath, rightMACenter);
-
-/** @type {PointLike} */
-const leftCurrent = { x: 0, y: 0 };
-/** @type {PointLike} */
-const rightCurrent = { x: 0, y: 0 };
-/** @type {PointLike} */
-const leftTarget = { x: 0, y: 0 };
-/** @type {PointLike} */
-const rightTarget = { x: 0, y: 0 };
 
 /**
- * Update eye targets based on cursor position
+ * ==================================================
+ * CORE FEATURES
+ * ==================================================
+ */
+
+/**
+ * Update eye target positions based on cursor
  * @param {PointLike} cursor
  */
 function updateEye(cursor) {
     // Blend region around center line (5% of eye distance)
-    const blendRegion = cd * 0.05;
+    const blendRegion = EYE_DISTANCE * 0.05;
+    const dL = getDistance(cursor, LEFT_MOVE_CENTER);
+    const dR = getDistance(cursor, RIGHT_MOVE_CENTER);
+    const clDist = distanceToCenterLine(cursor);
+    const primary = dL < dR ? 'l' : 'r';
 
-    // Distance from cursor to each eye center
-    const dl = distance(cursor, leftMACenter);
-    const dr = distance(cursor, rightMACenter);
-
-    const cld = distanceToCenterLine(cursor);
-    const primaryEye = dl < dr ? 'l' : 'r';
-
-    let ltx = 0, lty = 0, rtx = 0, rty = 0;
-    if (cld > blendRegion) {
-        ({ ltx, lty, rtx, rty } = calculateEyeTranslation(cursor, dl, dr, primaryEye));
-    } else {
-        // Blend the movement of both eyes based on distance to center line
-        const blend = cld / blendRegion;
-        const pRes = calculateEyeTranslation(cursor, dl, dr, primaryEye);
-        const sRes = calculateEyeTranslation(cursor, dl, dr, primaryEye === 'l' ? 'r' : 'l');
-
-        ltx = pRes.ltx * blend + sRes.ltx * (1 - blend);
-        lty = pRes.lty * blend + sRes.lty * (1 - blend);
-        rtx = pRes.rtx * blend + sRes.rtx * (1 - blend);
-        rty = pRes.rty * blend + sRes.rty * (1 - blend);
+    let res = calculateEyeTranslation(cursor, dL, dR, primary);
+    if (clDist <= blendRegion) {
+        const alt = calculateEyeTranslation(cursor, dL, dR, primary === 'l' ? 'r' : 'l');
+        const blend = clDist / blendRegion;
+        res = {
+            ltx: res.ltx * blend + alt.ltx * (1 - blend),
+            lty: res.lty * blend + alt.lty * (1 - blend),
+            rtx: res.rtx * blend + alt.rtx * (1 - blend),
+            rty: res.rty * blend + alt.rty * (1 - blend),
+        };
     }
 
-    leftTarget.x = ltx;
-    leftTarget.y = lty;
-    rightTarget.x = rtx;
-    rightTarget.y = rty;
+    leftEyeTarget.x = res.ltx;
+    leftEyeTarget.y = res.lty;
+    rightEyeTarget.x = res.rtx;
+    rightEyeTarget.y = res.rty;
 }
 
 /**
- * Calculate eye translation based on cursor position and primary eye
- * @param {PointLike} cursor Cursor position
- * @param {number} dl Distance from cursor to left eye center
- * @param {number} dr Distance from cursor to right eye center
- * @param {'l' | 'r'} primaryEye Primary eye ('l' for left, 'r' for right)
- * @returns {{ ltx: number, lty: number, rtx: number, rty: number }} Translation for left and right eyes
+ * Compute how eye should translate for a cursor
+ * @param {PointLike} cursor
+ * @param {number} dL distance to left eye
+ * @param {number} dR distance to right eye
+ * @param {'l' | 'r'} primaryEye
+ * @returns {{ltx:number,lty:number,rtx:number,rty:number}}
  */
-function calculateEyeTranslation(cursor, dl, dr, primaryEye) {
-    const lAngle = getAngle(leftMACenter, cursor);
-    const lnAngle = (lAngle < 0 ? lAngle + 360 : lAngle) - cAngle;
-    const rAngle = getAngle(rightMACenter, cursor);
-    const rnAngle = (rAngle < 0 ? 360 - (180 + rAngle) : 180 - rAngle) + cAngle;
+function calculateEyeTranslation(cursor, dL, dR, primaryEye) {
+    const lBoundPt = projectToPathBoundary(LEFT_EYE_ANGLE_MAP, LEFT_MOVE_CENTER, cursor);
+    const rBoundPt = projectToPathBoundary(RIGHT_EYE_ANGLE_MAP, RIGHT_MOVE_CENTER, cursor);
+    const pMoveCenter = primaryEye === 'l' ? LEFT_MOVE_CENTER : RIGHT_MOVE_CENTER;
+    const sMoveCenter = primaryEye === 'l' ? RIGHT_MOVE_CENTER : LEFT_MOVE_CENTER;
+    const pBoundPt = primaryEye === 'l' ? lBoundPt : rBoundPt;
+    const sBoundPt = primaryEye === 'l' ? rBoundPt : lBoundPt;
 
-    const pAngle = primaryEye === 'l' ? lnAngle : rnAngle;
+    let pBoundTransX = pBoundPt.x - pMoveCenter.x;
+    let pBoundTransY = pBoundPt.y - pMoveCenter.y;
 
-    const minD = Math.min(dl, dr);
+    const sBoundTransX = sBoundPt.x - sMoveCenter.x;
+    const sBoundTransY = sBoundPt.y - sMoveCenter.y;
 
-    // Instersect ray method mix
-    let im = 1;
+    const minD = Math.min(dL, dR);
+
+    const lAngle = getAngle(LEFT_MOVE_CENTER, cursor);
+    const lNormAngle = (lAngle < 0 ? lAngle + 360 : lAngle) - CENTER_ANGLE;
+    const rAngle = getAngle(RIGHT_MOVE_CENTER, cursor);
+    const rNormAngle = (rAngle < 0 ? 360 - (180 + rAngle) : 180 - rAngle) + CENTER_ANGLE;
+    const pAngle = primaryEye === 'l' ? lNormAngle : rNormAngle;
+
+    let interMix = 1;
     let inner = false;
     if (pAngle > 165 && pAngle < 195) {
         if (pAngle > 175 && pAngle < 185) {
-            im = 0;
+            interMix = 0;
         } else {
-            im = (Math.abs(pAngle - 180) - 5) / 10;
+            interMix = (Math.abs(pAngle - 180) - 5) / 10;
         }
         inner = true;
     }
     if (pAngle > 340 || pAngle < 20) {
         if (pAngle > 350 || pAngle < 10) {
-            im = 0;
+            interMix = 0;
         } else {
-            im = (Math.abs(pAngle > 340 ? pAngle - 360 : pAngle) - 10) / 10;
+            interMix = (Math.abs(pAngle > 340 ? pAngle - 360 : pAngle) - 10) / 10;
         }
     }
 
-    // Left eye boundary point
-    const lBP = projectToPathBoundary(leftAngleMap, leftMACenter, cursor);
-    // Right eye boundary point
-    const rBP = projectToPathBoundary(rightAngleMap, rightMACenter, cursor);
-
-    // Primary MA center
-    const pMAC = primaryEye === 'l' ? leftMACenter : rightMACenter;
-    // Secondary MA center
-    const sMAC = primaryEye === 'l' ? rightMACenter : leftMACenter;
-
-    // Primary-to-secondary eye vector
-    const psVec = primaryEye === 'l' ? rlVec : lrVec;
-    // Primary eye center-to-cursor vector
+    const psVec = primaryEye === 'l' ? RIGHT_LEFT_VECTOR : LEFT_RIGHT_VECTOR;
     const pcVec = {
-        x: cursor.x - pMAC.x,
-        y: cursor.y - pMAC.y
+        x: cursor.x - pMoveCenter.x,
+        y: cursor.y - pMoveCenter.y
     };
 
-    // Primary eye boundary point
-    const pBP = primaryEye === 'l' ? lBP : rBP;
-
-    // Secondary eye boundary point
-    const sBP = primaryEye === 'l' ? rBP : lBP;
-
-    // Secondary eye translate X, Y
-    const stx = sBP.x - sMAC.x;
-    const sty = sBP.y - sMAC.y;
-
-    // Primary boundary translate X, Y
-    let pbtx = pBP.x - pMAC.x;
-    let pbty = pBP.y - pMAC.y;
-
-    // Primary boundary translate fraction
-    let pbtf = 1;
+    let pBoundTransFract = 1;
     if (inner) {
-        // Clamped minimum distance to half the eye distance
-        const cMinD = minD > cd / 2 ? cd / 2 : minD;
-        pbtf = cMinD * 2 / cd;
-        // More natural slow in/out
-        pbtf -= bellCurve(pbtf, 0.2);
+        const clampMinD = minD > EYE_DISTANCE / 2 ? EYE_DISTANCE / 2 : minD;
+        pBoundTransFract = clampMinD * 2 / EYE_DISTANCE;
+        pBoundTransFract -= bellCurve(pBoundTransFract, 0.2);
     } else {
-        // Distance units
-        const du = minD / cd + 1;
-        pbtf = 1 - 1 / Math.pow(du, 0.95);
+        const distUnits = minD / EYE_DISTANCE + 1;
+        pBoundTransFract = 1 - 1 / Math.pow(distUnits, 0.95);
     }
-    pbtx *= pbtf;
-    pbty *= pbtf;
+    pBoundTransX *= pBoundTransFract;
+    pBoundTransY *= pBoundTransFract;
 
-    // Primary intersection translate X, Y
-    let pitx = pbtx, pity = pbty;
-    if (im > 0) {
-        const ip = intersectRays(sBP, psVec, pMAC, pcVec);
-        if (ip) {
-            pitx = ip.x - pMAC.x;
-            pity = ip.y - pMAC.y;
+    let pInterTransX = pBoundTransX, pInterTransY = pBoundTransY;
+    if (interMix > 0) {
+        const interPt = intersectRays(sBoundPt, psVec, pMoveCenter, pcVec);
+        if (interPt) {
+            pInterTransX = interPt.x - pMoveCenter.x;
+            pInterTransY = interPt.y - pMoveCenter.y;
         }
     }
 
-    // Primary eye translate X, Y
-    const ptx = pitx * im + pbtx * (1 - im);
-    const pty = pity * im + pbty * (1 - im);
+    const pTransX = pInterTransX * interMix + pBoundTransX * (1 - interMix);
+    const pTransY = pInterTransY * interMix + pBoundTransY * (1 - interMix);
 
     return {
-        ltx: primaryEye === 'l' ? ptx : stx,
-        lty: primaryEye === 'l' ? pty : sty,
-        rtx: primaryEye === 'r' ? ptx : stx,
-        rty: primaryEye === 'r' ? pty : sty
+        ltx: primaryEye === 'l' ? pTransX : sBoundTransX,
+        lty: primaryEye === 'l' ? pTransY : sBoundTransY,
+        rtx: primaryEye === 'r' ? pTransX : sBoundTransX,
+        rty: primaryEye === 'r' ? pTransY : sBoundTransY
     };
 }
 
-/* Linear interpolation
- * @param {number} a Start value
- * @param {number} b End value
- * @param {number} t Interpolation factor [0, 1]
- * @returns {number} Interpolated value
- */
-function lerp(a, b, t) {
-  return a + (b - a) * t;
-}
-
-let lastTime = 0;
 /**
- * Animation frame handler
- * @param {number} now Current time in milliseconds
+ * Animation loop for eye movement
+ * @param {number} now
  */
-function onAnimationFrame(now) {
+function onFrame(now) {
     const delta = now - lastTime;
-    
-    const ld = distance(leftCurrent, leftTarget);
-    const rd = distance(rightCurrent, rightTarget);
-    const md = Math.max(ld, rd);
+
+    const lD = getDistance(leftEyeCurrent, leftEyeTarget);
+    const rD = getDistance(rightEyeCurrent, rightEyeTarget);
+    const maxD = Math.max(lD, rD);
 
     const fastBase = 0.85; // snappy when close
     const slowBase = 0.15; // gentle when far away
-    const distThreshold = cd * 0.5; // half eye distance
-    
-    const jumpFactor = Math.min(md / distThreshold, 1);
+    const distThreshold = EYE_DISTANCE * 0.5; // half eye distance
+
+    const jumpFactor = Math.min(maxD / distThreshold, 1);
     const adaptiveBase = fastBase * (1 - jumpFactor) + slowBase * jumpFactor;
     const smoothing = 1 - Math.pow(1 - adaptiveBase, delta / 16.7);
 
-    leftCurrent.x = lerp(leftCurrent.x, leftTarget.x, smoothing);
-    leftCurrent.y = lerp(leftCurrent.y, leftTarget.y, smoothing);
+    leftEyeCurrent.x = getLerp(leftEyeCurrent.x, leftEyeTarget.x, smoothing);
+    leftEyeCurrent.y = getLerp(leftEyeCurrent.y, leftEyeTarget.y, smoothing);
 
-    rightCurrent.x = lerp(rightCurrent.x, rightTarget.x, smoothing);
-    rightCurrent.y = lerp(rightCurrent.y, rightTarget.y, smoothing);
+    rightEyeCurrent.x = getLerp(rightEyeCurrent.x, rightEyeTarget.x, smoothing);
+    rightEyeCurrent.y = getLerp(rightEyeCurrent.y, rightEyeTarget.y, smoothing);
 
-    leftEyeCenterG.setAttribute('transform', "translate(" + (leftCurrent.x + offsetLeft.x) + "," + (leftCurrent.y + offsetLeft.y) + ")");
-    rightEyeCenterG.setAttribute('transform', "translate(" + (rightCurrent.x + offsetRight.x) + "," + (rightCurrent.y + offsetRight.y) + ")");
+    LEFT_EYE_GROUP.setAttribute('transform', 'translate(' + (leftEyeCurrent.x + OFFSET_LEFT_EYE.x) + ',' + (leftEyeCurrent.y + OFFSET_LEFT_EYE.y) + ')');
+    RIGHT_EYE_GROUP.setAttribute('transform', 'translate(' + (rightEyeCurrent.x + OFFSET_RIGHT_EYE.x) + ',' + (rightEyeCurrent.y + OFFSET_RIGHT_EYE.y) + ')');
     lastTime = now;
-    requestAnimationFrame(onAnimationFrame);
-}
-requestAnimationFrame(onAnimationFrame);
 
-svg.addEventListener("mousemove", function (evt) {
-    const rect = svg.getBoundingClientRect();
-    const cursor = {
-        x: (evt.clientX - rect.left) * (svg.viewBox.baseVal.width / rect.width),
-        y: (evt.clientY - rect.top) * (svg.viewBox.baseVal.height / rect.height),
-    };
-    updateEye(cursor);
-});
-
-/**
- * Touch event handler
- * @param {TouchEvent} evt
- */
-function handleTouch(evt) {
-    if (evt.touches.length === 0) return;
-
-    const touch = evt.touches[0];
-    const rect = svg.getBoundingClientRect();
-    const cursor = {
-        x: (touch.clientX - rect.left) * (svg.viewBox.baseVal.width / rect.width),
-        y: (touch.clientY - rect.top) * (svg.viewBox.baseVal.height / rect.height),
-    };
-    updateEye(cursor);
+    requestAnimationFrame(onFrame);
 }
 
-svg.addEventListener('touchstart', handleTouch, { passive: true });
-svg.addEventListener('touchmove', handleTouch, { passive: true });
-
-/** @type {number | null} */
-let volumebarTimeout = null;
-
 /**
- * Update "volume bar" UI in the ears
- * @param {number} newVolume Volume level [0, 1]
+ * Update ear volume bar gradients
+ * @param {number} newVolume
  */
 function updateVolumeBar(newVolume) {
-    if (volumebarTimeout) {
-        clearTimeout(volumebarTimeout);
-        volumebarTimeout = null;
+    if (volumeBarTimeout) {
+        clearTimeout(volumeBarTimeout);
     }
-    const v = 1 - Math.max(0, Math.min(1, newVolume));
-    leftGradS1.setAttribute('offset', v.toString());
-    leftGradS2.setAttribute('offset', v.toString());
-    rightGradS1.setAttribute('offset', v.toString());
-    rightGradS2.setAttribute('offset', v.toString());
-    svg.classList.add('vbar');
-    volumebarTimeout = setTimeout(() => {
-        svg.classList.remove('vbar');
-        volumebarTimeout = null;
+    const stop = (1 - newVolume).toString();
+
+    LEFT_VOLUME_GRADIENT_STOP1.setAttribute('offset', stop);
+    LEFT_VOLUME_GRADIENT_STOP2.setAttribute('offset', stop);
+    RIGHT_VOLUME_GRADIENT_STOP1.setAttribute('offset', stop);
+    RIGHT_VOLUME_GRADIENT_STOP2.setAttribute('offset', stop);
+
+    SVG.classList.add('vbar');
+    volumeBarTimeout = setTimeout(() => {
+        SVG.classList.remove('vbar');
+        volumeBarTimeout = null;
     }, 2000);
 }
 
-// .m4a (aac) base64 encoded audio data
-const boop64 = `
-AAAAHGZ0eXBNNEEgAAACAE00QSBpc29taXNvMgAAAAhmcmVlAAASTm1kYXTcAExhdmM2MC4zLjEwMAAByK9AUe24EwaC599Tvz61X475671dd+al71RWiUiZCRX8jcTBwAoOMDgBQBtI8PD1gHz8Pe3X+WU8QCqaqueefj0lE1KIynQ1Bc1XOVQArp0CzPx6ePSUksEDK7KeIi7LLKcAhABVAFzlhuzMbM8+zxlBVslfKIBQADWzPN7mzW
-IKDsWyUIgxy6mVQCEUYhFI8xiDG7qQIiLoyynjKeMssu/yz2SldlO2ecq2ZjAAa25TgALnnKq2eMpQgKPf5fL5erLLJDz8emeeea555qqld3+XLKcobMQNbFLLLLLLLy9WWX7dVlSKTZ555yr2eP/PHx8egospRCKWU9nZnnnmtmeeefZ45iWUFv8vVkkREWZ55umeduUZVeXw92XDV1bZY6dXVzzpjTq54jDO4Y06styYmAtwVDzb6Acv
-HOsY1MGFcbSIZdOrq+Hu+pBNVz7PHOVRg3hRungAKIBVAE8sgr2jPMni3+g6pjAcz+/nuMRlc6pWK5WEMh2D8x/QtFf5XvfAATae2H82Wiakyst3TY2W8pvjrr29co1vM6/6/6gAP9/9QAH/r/9EoSgI4+j/+QQjPNn07fu0Ghc0USjTgPuBHS3Kgj4+0+QikKwespihpYakicARTgD6sAFrvf7+LuHY0OSbQdLkSSki0hyeg0HCA7cKw7
-oedTxv57mOzBIgrEKJUASSTLQEJMPjEmEHjDTenDx6QXOLtkCBj63auOcg9T9XtRXe66JpK/+FxrmpgE9PYof7svbtMjMBAFBGsMUAG6VDAuEIT1FUlCKS43KIEgEM1Xx5FylLDMZwUK2dWYFBWMnMimovgDh73MwoF7QvHarw8RY9RIqnaogzSqdywdsqPNbNhVTe53dEUVoiXbRUBgmCg5Mi7yiNeo8xxHfLfXcrpKoXetZt5itZxoOq
-a3X6P/w60/w7SFUP4svUFOcXGd8dvD1rvpLBxm67K2rmr7MSA1jZ8acuwraA/v4N5FAVoMh2+2QxG59PjmhIL0HidtB0QrijUVMrJNGqal/dtb6HoGIz6rPdrhIsbqtFXoHWsue0r+tXxECIcAE6nzR90irKcxTNGfKLqzP4ff3+/nnFVvb3zz/t/+z49wA/6/64AB/5fbf29u8vABCFza/Of4SloHfPSkd5IGmAbfytKC3G8Lrk1oiEUp
-AY7NwbEI9nw4v+v2pjbbGNMtOrq2y2109vl48+nw93Vz226urfWf+3+rjEzmgRvIIlBrcZKuuy1HBVkGtIdVXVtDblkGRRocKZ7yU8rTXOPU6RyekHdcravF+eBHzOU00Jaurq/3XajGv1Trw9uVBCqWv3PRo50cfEFbe7hz4SJ8R3rCHhZY+v+912lnB0/oYEDqu0Ms+wyyCTjwFSavABVqFChCAISrmuAGSjqnO2LCGfg5X3SGCvOZmU
-E1zuATU/DyN3vUDf+3cAvlfz31D9h4Mwrz7+zwXu6mXNgy7bbA3wAXwAcAEq96hI9iIcT6EQ6FAiFgmFgiHRvr/jSXWu/bnW98VX8P+/dq8e/zv/fxv9P88xb9vxxre+K/b74Pj43E8ZGqq3khYOY0+PW5SQQAlt76VWusacetmblZKAD443bJey4ulb+NBQU1wvg411D3eJqIr/8vm+gMWqMZmB5dmyTdTCZPh+0ESSsMsE77Phs/OIB3
-QgvwXguSfLObfaA/9oAAAAAEICTvhhg+Phbq6+W3ljp/n/WYMYAAAAAAAAAOnr83hGEuO+XZp6uyvqs8ZYf0gAA4ABNjeoIBsjFIsEQ8o0Mh0MhsKhsLhsLhMOhPv//N//f/7a9l/0359vXm/0/b/SS1evevx/P/4Vx5g/r6luZavcedFmAKBHGfHkh8efBh2KkYrXgfX4YrR9GfeU/uNE9ahllniHKSlw6l9wBtvNWY0m/IPgVbEE3Hje
-yhOAY/P8kIKy1+b6l1gCxhF4hjZhjJuALtMAGXRdlxPqHTpEgAALxiKnsfG/afhfzT+P1gAAMmy4rdxtPd2Xxb494t1XOo/p2pCxTCgAAAAEAAAAKLBIxgTPbm6uvevYZ5zTxj2jkXaX/n8IsjGmAAAAABQAAAACSZhWWr1uH42Hbi2VzXXILjl4NABdYAUAAAAAAAAAAAAAAEAkxrKtXqfB9D73reV6Lk/5Oz8YKxAHASY3qCUhag9CYt
-CIaCoaCodG8N0vjwXx4G/6b/08qrfv9p/z4zx98jH2nfP48ee9fGh+umZehinnvovnO7LjwpoCjoBIfw7vQwtRSK39JX63qBQt64BBX5wlH76OsytvlteMQWGfxZMqObuIMPHhHAWsl5PZf3rmgASwdP/jEABDBzOfVlnxIjyed49NtGi4Omxmx4bG6FtvVv7en7vr/87cr+cgAN7BNloMGjRpOTkYDJ4ut32UKcW9XDJ4KNrV5q1Zs3P0
-nGuf8Pn2u/twA0Nag3ve973vgAEyN6ggFIEiAiRgoJg6KA6GC6M5kMvduK/PNeP5+vedevF+Ndc3S4j5r3pu7nXs0o3t/wUZAAHdsIwkUdZWizwmmW+SmyDwRiB2tmx3mqAESS+Gz/AKMDHpTgk1VE11Vfx5ZFAUxxRcNEIxZXjhzSuqnzeb+tNspKbLvfuTwXqk5jClC3bcPN29dfADjgbao5WLttLUZ2SxlN7Wa0A7gAGpF9hEpFq1zr
-nlU+1+a52p90PwdLZfpne1svFXZyUNHeQ0UAI8DBdnkIlTCyyKdgzfmW+s1/M6eLyrvQ8KXsbLut/7NDyu67bGlCnWSHfqgWM2Im/eTGhJSen0Eb+Jl+LJ1XV8rJ6nD935tXa6ar3NDdUdrFQyq6kWtkJlJFcBNFeoIBX4tJQ9IISmS8z43xyfbfHf764757lZ7Yq0F176lub11Q5aApVExabpWSpaKa0aqIIWjK77TOclZoGZXOc1JAZz
-AF4MY7+/v+v6fnuJze7xgAJBkJulqtXwieoT8Oz4fCIznPdbMNFAxUQMMMxjDs+r7vOPh8ACB5hRJIQoJLe+ZT1ahjQ1mx1mjhG1PxW7/K5lJV91RR2c1mu0tdMma1RF10RUpRiTbdDYkyQxv51jxmi9W9q6NXWldymRM4F9sNVxeEZQA4ABMJ81cfVytss3KsnTKtXIlrTKtHr21vNYvcnX38fp+f/f8+PrmoNfzf7+3r7c/zX9f9P2rj
-X6eeP1j+n+nP9f9/24Z9uvI7a8Uht67aqbui/90R/P5Noc/F1Kzt8RWT93Vt/bKbzJh+kdPrVi2smmD+YfwOeWoRZNGCjV4LX8XgcefFFp7roZSIYomTh7uQQjQOyZtN5BhvQ1YAfkuRrhliT4rQkWRkWNTHUaIzWJbsQ/zUwLyaVjTJ5OWYXOJfoqn043zPjB2xn5kHCpY3DwrpHfpaOm5+sOQHPFECReanDHHnvoVd08sr4DSrfjj3n5
-bfCyrS+d78Fdv8aB9NIJ9jkF/UABUHSiYUALLH1O+SygAB/RT4AAs6B0EsALZNk1FxwbgLAAehzDmYskllAD0WH8jLyBkdRHz7TdQ3Ng8LU5d7Aw15pbvkJ+bWm55xoWfKZKJu74PPYU2BwscTSUeApzuB+79l37P1zn42738Ip3nn9A4/5NIDQrYBZQGFiqH51cWAN+f2vYxppnICggRAhHEKAFJlQOARr3rCQ6CTIER6CpmCodI4dDYT
-DIhDoX/Htr/r/049c5xlcXz+y/vxVK53PPW/y/+//7RP/T/0/GtcypPQIibZoNBTLfqL/9kfM9HhIma3I2lIdWHxwFCE7MxKVnSoJrh5mxkAW6iwyj21tHKgswgNTasgLjEYqGKG7MN76f8f7dcVACUTmA1tFk5xg+HdfwEAX1a+3+0/AAVhevy938Hi/jcX83k9bjiBoABgiNjPoEjd5jpLiGX/yMMi0WWjwwxaoAOHpn/6CL536R8Y/p
-/zb9l+a/4Xz7ps6yyyqQAAAC9fj8fj9H73634TzPxr6j/TfZs9XpdHR8QAA4ARg3rCASfAVgwdCIdG4aFIYDoRC9c+fUrKrK/Xc/1v78cTnjx88/jzf9cfHiH67+v7T1574+tiiwZfTz3G+bbSLM6kjmYQx5hlm2VsVm5JKyJFqznLRjQFET0dvs/28/+P5fdmBIznOai4gECBQI3rlw+fX8Or/ztxIGMSAAAFa2hoLVrjHk8ncLCAFdXO
-E3Ngya+7qeVo8/I19bwfffm/1TSFSVZZtPlLTlXo31W1XbytOQCPPiiiiiRiiOiQBCINpE8AlGBRQdiLmtE91XFPe2270aP9p/af237T3Hlc3RyJABcxMTEwc5xwiG80jFuo/BzZHze1rmpLIDqCFbnOd4fJhAAcABJjesIBXwiYOlomjYzKlKt5leHWr3Xn1WcVMkq35f28+8rW59+h4sMhSJtNEpkRMILIvMWZL6/5cO7UyTLChO2ANQ
-mqFpoxPf28u7656L40IQskCRJQEJXnPDtjP1/6/Z+PK4lERNhhupMJU2I0FU60w83hTMV74VW4YJulMGF7AkeurBmx7tRUaNrGsaJ5kXg6E9WrVp/om812nKbbabdRsL0iYDaolIFTTDgBII4RNyBt7rRbDI3RDYBtcqPXdBNyHDZV/W15KXGeCkn01jsVBPxoRE8EGJFFBGa1FBAiiPCc8BGDeoLYgTI0lE0j5ri+Uo6TaZdV1WubZxUy
-RAN4lSVr40P3YyIIGdzXrCzDQRMbku9WoN7yndgYRNCOcWS73Khgo3GAMQPjYkiVLXlKBYxnzpOSRXXCU8k0SVW4zHlAwwlQsoHZAgllkoPediWwWN1yLDWPpkqtlxnvm/Xup9WMleAGCJDgdmJVOpozXFe/A2IgCUDiJpr41pdr/71zWuryFZRl8kGcmpglUdBU8JYqKX5iz87ye0xts4870MpdMqUNyTxYjBhVC5taPStv7ru606F22r
-YnsxlOu92ayfC718t9VWvjm5uxqAITOn+3OOFqq41Otc2taLaGVBMa5cHprKVnQ09G7y4o1Kh+rx3AEgN6wtiAsnSUTSFVqfOeyavL3rmVd1M1kuMtH2zKi3XHA73edkyACAVDgZtasltmJCPPy+G/4c0msuXKshEroSECR3OaHADSjaOhJab+N7nIqRFk1EqKzGaMxdffweNvcvXF2E2/0o2OMUoc1FtJQp3Yq92MtGILdXJJ4RfNkLY0
-pC1mKPSYugzZqu4gGlrA67acsAwkqtsrCvruwsWnnooDWWffwVxNViAzy4nVJ01ZUaHNVqdRBae8XUJ4yP5TDySRLIvV881N5uil5Qlt4zpHwLPPc34ms8Fh/XYPlObsGN/AKHKih6okM2kyu0OFp5KNkX2EsUHm1lzmkxsC/Y2er1ee8sFvZEKZ4F+Ztz35mSz4ABHDesLNUkJZGkomkVczl1dNbmTVVxmqVqqvLy6t8yslNNdeR9ijOn
-t46e+V0WZwd2xukc7e2vhNgWF+MzCoq2HzljNHSHBO2w9kWSk0/k3kqp8CeLKKKkzWQFzVsuSKh1r9Ro6GP2qcTO+zZXO9tm9TdeilDjC+Yq1jPzQsS+aa2SmZq9VZSI/52+A9cSCwtXUQwt0jpZv6eDI2GB132mwA7AhkEjOQuzYzONP+FYGSM5UspqQ2AjIxpLzx28av9TKkmfPK00i6dSegySrNbie1akl8dtxbrtXbrzaspkYRXWXq
-XwLw/3HFFF5zdGgwa7VSjKCIsE3rMBxqp3FAWRSDkM9pWBRzVkK59t1COw0Myg1NlEiVA8AOI3oITTOxFFBGEIYCwaIpHijOMjrni9yVzd62cVCTXMZrdypuqsZN1CCEgoP0ce5j7kuCFqjcHzbkuT/RSjlN1GGlHep9UZkdxTCnf//tv80L1+bR3doI9N3/+GLM5MkFRiuxf1/SCkUER0k9reaKco6IF1L11tiyYXiqJEJBS7n2WL9STd
-d1GC4UnakCUcIuIU+G7tVmaO7UwMQELH15f/7RauzzTW8iR4fCW5ywuRqWOFrl0fl1sqqKHkyYkcfx20zAxGwMgAAkCClauJKOKS2WUyKGDkVIGS41DZGsxHFGUeB22+49tw5kkZGiuUiknuf/m7yRXn4J21OZRwaaOKdyNhIbOTj4gj0DSIzk4Y8YKJAMyclnX16fgU2dZU35TxlZkuNQ0jOmSRjR/zmEYv6/H+X3ZVlF4wGJYXhYqO/5
-yXXwi8SBgmsxgkznMYxIAAyMd/z38IxvN1ljGAGPnOc5DgAAADV21vb3YAAABsbXZoZAAAAAAAAAAAAAAAAAAAA+gAAAKoAAEAAAEAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAJldHJhawAAAFx0a2hkAAAAAwAAAAAAAAAAAAAAAQAAAAAA
-AAKoAAAAAAAAAAAAAAABAQAAAAABAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAJGVkdHMAAAAcZWxzdAAAAAAAAAABAAACpwAABAAAAQAAAAAB3W1kaWEAAAAgbWRoZAAAAAAAAAAAAAAAAAAAViIAAD6AVcQAAAAAAC1oZGxyAAAAAAAAAABzb3VuAAAAAAAAAAAAAAAAU291bmRIYW5kbGVyAAAAAY
-htaW5mAAAAEHNtaGQAAAAAAAAAAAAAACRkaW5mAAAAHGRyZWYAAAAAAAAAAQAAAAx1cmwgAAAAAQAAAUxzdGJsAAAAanN0c2QAAAAAAAAAAQAAAFptcDRhAAAAAAAAAAEAAAAAAAAAAAABABAAAAAAViIAAAAAADZlc2RzAAAAAAOAgIAlAAEABICAgBdAFQAAAAAAyXYAAMl2BYCAgAUTiFblAAaAgIABAgAAACBzdHRzAAAAAAAAAAIA
-AAAPAAAEAAAAAAEAAAKAAAAAHHN0c2MAAAAAAAAAAQAAAAEAAAAQAAAAAQAAAFRzdHN6AAAAAAAAAAAAAAAQAAABkwAAAZwAAAE1AAAA0wAAASoAAADZAAABHgAAAMwAAAGZAAAA/AAAAQcAAADkAAABEAAAARUAAAEYAAABZQAAABRzdGNvAAAAAAAAAAEAAAAsAAAAGnNncGQBAAAAcm9sbAAAAAIAAAAB//8AAAAcc2JncAAAAAByb2
-xsAAAAAQAAABAAAAABAAAAfnVkdGEAAAB2bWV0YQAAAAAAAAAhaGRscgAAAAAAAAAAbWRpcmFwcGwAAAAAAAAAAAAAAABJaWxzdAAAACSpdG9vAAAAHGRhdGEAAAABAAAAAExhdmY2MC4zLjEwMAAAAB2pZ2VuAAAAFWRhdGEAAAABAAAAAEJsdWVz
-`.replace(/\s+/g, '');
-
-/** @type {AudioBuffer | null} */
-let cachedBoop = null;
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-const PONY_ID = 'minuette';
-let currentVolume = 0.5;
-if (localStorage.getItem(`xstare_${PONY_ID}_volume`)) {
-    const v = parseFloat(localStorage.getItem(`xstare_${PONY_ID}_volume`));
-    if (!isNaN(v) && v >= 0 && v <= 1) {
-        currentVolume = v;
-    }
-}
-const gainNode = audioCtx.createGain();
-gainNode.gain.value = currentVolume;
-gainNode.connect(audioCtx.destination);
-
 /**
- * Update the volume, clamped between 0 and 1
+ * Update global volume and save to storage
  * @param {number} newVolume
  */
 function updateVolume(newVolume) {
@@ -855,10 +767,10 @@ function updateVolume(newVolume) {
 
 /**
  * Add volume control to a given SVG area by scrolling or petting (click and drag)
- * @param {SVGPathElement} vcArea
+ * @param {SVGPathElement} area
  */
-function addScrollVolumeControl(vcArea) {
-    vcArea.addEventListener('wheel', (evt) => {
+function addScrollVolumeControl(area) {
+    area.addEventListener('wheel', (evt) => {
         evt.preventDefault();
 
         const step = 0.05;
@@ -867,12 +779,12 @@ function addScrollVolumeControl(vcArea) {
 
     let isPetting = false;
     let startY = 0;
-    let startVolume = 0;
+    let startVol = 0;
 
-    vcArea.addEventListener('pointerdown', (evt) => {
+    area.addEventListener('pointerdown', (evt) => {
         isPetting = true;
         startY = evt.clientY;
-        startVolume = currentVolume;
+        startVol = currentVolume;
     });
 
     window.addEventListener('pointermove', (evt) => {
@@ -883,7 +795,7 @@ function addScrollVolumeControl(vcArea) {
         // but c'mon, who doesn't like stoking pone ears as many times as possible?
         const sensitivity = 0.0025;
 
-        updateVolume(startVolume - dy * sensitivity);
+        updateVolume(startVol - dy * sensitivity);
     });
 
     window.addEventListener('pointerup', () => {
@@ -891,11 +803,8 @@ function addScrollVolumeControl(vcArea) {
     });
 }
 
-addScrollVolumeControl(leftVCArea);
-addScrollVolumeControl(rightVCArea);
-
 /**
- * Convert a base64 string to an ArrayBuffer
+ * Convert base64 to ArrayBuffer
  * @param {string} base64
  * @returns {ArrayBuffer}
  */
@@ -910,70 +819,167 @@ function base64ToArrayBuffer(base64) {
 }
 
 /**
- * Initialize and decode the boop sound
+ * Decode boop audio once
  */
 async function initBoop() {
-    const arrayBuffer = base64ToArrayBuffer(boop64);
-    cachedBoop = await audioCtx.decodeAudioData(arrayBuffer);
+    // .m4a (aac) base64 encoded audio data
+    const arrayBuffer = base64ToArrayBuffer(`
+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
+HWRhdGEAAAABAAAAAExhdmY1OS4xNi4xMDA=
+`.replace(/\s+/g, ''));
+    loadedBoop = await audioCtx.decodeAudioData(arrayBuffer);
 }
 
-initBoop().catch(console.error);
-
 /**
- * Play the boop sound
+ * Play boop sound
  */
 function playBoop() {
-    if (!cachedBoop) {
+    if (!loadedBoop) {
         console.warn('Sound not loaded yet');
+        return;
     }
     if (currentVolume === 0) {
         return;
     }
-    const boopSrc = audioCtx.createBufferSource();
-    boopSrc.buffer = cachedBoop;
-    boopSrc.connect(gainNode);
-    boopSrc.start();
+    const src = audioCtx.createBufferSource();
+    src.buffer = loadedBoop;
+    src.connect(gainNode);
+    src.start();
 }
 
-let scrunchTimeout = null;
-boopArea.addEventListener('pointerdown', (evt) => {
+function resizeAndCenterSVG() {
+    const ratio = window.devicePixelRatio / BASE_RATIO;
+    const size = (Math.min(window.innerWidth, window.innerHeight) * 0.5 * ratio).toString();
+
+    SVG.setAttribute('width', size);
+    SVG.setAttribute('height', size);
+    SVG.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+
+    SVG.style.position = 'absolute';
+    SVG.style.left = '50%';
+    SVG.style.top = '50%';
+    SVG.style.transform = 'translate(-50%, -50%)';
+}
+
+/**
+ * Handle any pointer event
+ * @param {{ clientX : number, clientY : number }} pointer
+ */
+function handlePointer(pointer) {
+    const rect = SVG.getBoundingClientRect();
+    const cursor = {
+        x: (pointer.clientX - rect.left) * (SVG.viewBox.baseVal.width / rect.width),
+        y: (pointer.clientY - rect.top) * (SVG.viewBox.baseVal.height / rect.height),
+    };
+    updateEye(cursor);
+}
+
+/**
+ * ==================================================
+ * RUNTIME WIRING
+ * ==================================================
+ */
+
+requestAnimationFrame(onFrame);
+resizeAndCenterSVG();
+window.addEventListener('resize', resizeAndCenterSVG);
+
+SVG.addEventListener('mousedown', (evt) => handlePointer(evt));
+SVG.addEventListener('mousemove', (evt) => handlePointer(evt));
+SVG.addEventListener('mouseup', (evt) => handlePointer(evt));
+SVG.addEventListener('touchstart', (evt) => {
+    if (evt.touches.length === 0) return;
+    handlePointer(evt.touches[0]);
+});
+SVG.addEventListener('touchmove', (evt) => {
+    if (evt.touches.length === 0) return;
+    handlePointer(evt.touches[0]);
+});
+SVG.addEventListener('touchend', (evt) => {
+    if (evt.touches.length === 0) return;
+    handlePointer(evt.touches[0]);
+});
+
+addScrollVolumeControl(LEFT_EAR_VOLUME_AREA);
+addScrollVolumeControl(RIGHT_EAR_VOLUME_AREA);
+
+initBoop().catch(console.error);
+
+BOOP_PATH.addEventListener('pointerdown', (evt) => {
     evt.preventDefault();
     playBoop();
     if (scrunchTimeout) {
         clearTimeout(scrunchTimeout);
         scrunchTimeout = null;
     }
-    svg.classList.add('scrunch');
+    SVG.classList.add('scrunch');
     scrunchTimeout = setTimeout(() => {
-        svg.classList.remove('scrunch');
+        SVG.classList.remove('scrunch');
         scrunchTimeout = null;
     }, 650);
 });
-
-const baseRatio = window.devicePixelRatio;
-
-function getRelativeZoom() {
-    return window.devicePixelRatio / baseRatio;
-}
-
-function resizeAndCenterSVG() {
-    const rz = getRelativeZoom();
-    const w = window.innerWidth;
-    const h = window.innerHeight;
-    const size = Math.min(w, h) * 0.5 * rz;
-
-    svg.setAttribute("width", size);
-    svg.setAttribute("height", size);
-    svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
-
-    svg.style.position = "absolute";
-    svg.style.left = "50%";
-    svg.style.top = "50%";
-    svg.style.transform = "translate(-50%, -50%)";
-}
-
-resizeAndCenterSVG();
-window.addEventListener("resize", resizeAndCenterSVG);
 
 		]]>    </script>
 </svg>
