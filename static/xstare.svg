@@ -41,6 +41,7 @@
     </defs>
     <style>
 		svg { touch-action: none;-ms-touch-action: none }
+		#Boop\ area { -webkit-tap-highlight-color: transparent;-webkit-touch-callout: none;user-select: none;outline: none;touch-action: none;cursor: pointer }
 		.s0 { fill: #83c5ee;stroke: #467bbc;stroke-miterlimit:100;stroke-width: 100 }
 		.s1 { display: none;fill: none;stroke: #467bbc;stroke-miterlimit:100;stroke-width: 100 }
 		.s2 { fill: #467bbc }
