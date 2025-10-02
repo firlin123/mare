@@ -254,13 +254,13 @@ const RIGHT_EYE_ANGLE_MAP = buildAngleMap(RIGHT_EYE_MOVE_AREA, RIGHT_MOVE_CENTER
 
 // --- Eye state ---
 /** @type {PointLike} */
-const leftEyeCurrent = { x: 0, y: 0 };
+const leftEyeCurrent = { x: -OFFSET_LEFT_EYE.x, y: -OFFSET_LEFT_EYE.y };
 /** @type {PointLike} */
-const rightEyeCurrent = { x: 0, y: 0 };
+const rightEyeCurrent = { x: -OFFSET_RIGHT_EYE.x, y: -OFFSET_RIGHT_EYE.y };
 /** @type {PointLike} */
-const leftEyeTarget = { x: 0, y: 0 };
+const leftEyeTarget = { x: -OFFSET_LEFT_EYE.x, y: -OFFSET_LEFT_EYE.y };
 /** @type {PointLike} */
-const rightEyeTarget = { x: 0, y: 0 };
+const rightEyeTarget = { x: -OFFSET_RIGHT_EYE.x, y: -OFFSET_RIGHT_EYE.y };
 
 let lastTime = 0;
 /** @type {number | null} */
