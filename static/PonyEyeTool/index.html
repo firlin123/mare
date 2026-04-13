@@ -10,7 +10,8 @@
 <body>
 	<div class="tool-layout">
 		<div class="tool-preview">
-			<svg version="1.2" xmlns="http://www.w3.org/2000/svg" class="no-cheek" viewBox="0 0 2000 1600" width="1000">
+			<svg version="1.2" xmlns="http://www.w3.org/2000/svg" class="no-cheek" viewBox="0 0 2000 1600" width="2000"
+				height="1600">
 
 				<defs xmlns="http://www.w3.org/2000/svg">
 					<clipPath clipPathUnits="userSpaceOnUse" id="cp1">
@@ -1351,9 +1352,27 @@
 		}
 
 		function bakeNode(originalNode, clonedNode) {
+			if (originalNode instanceof SVGSVGElement || originalNode instanceof SVGDefsElement || originalNode instanceof SVGClipPathElement) {
+				return;
+			}
+			if (originalNode instanceof SVGStyleElement) {
+				clonedNode.remove();
+				return;
+			}
 			const style = getComputedStyle(originalNode);
 
-			clonedNode.setAttribute("display", style.display);
+			if (style.display === "none" || style.visibility === "hidden" || style.opacity === "0") {
+				clonedNode.remove();
+				return;
+			}
+
+			clonedNode.removeAttribute("class");
+
+			if (style.display && style.display !== "inline") {
+				clonedNode.setAttribute("display", style.display);
+			} else {
+				clonedNode.removeAttribute("display");
+			}
 
 			if (style.visibility && style.visibility !== "visible") {
 				clonedNode.setAttribute("visibility", style.visibility);
@@ -1378,13 +1397,15 @@
 				clonedNode.removeAttribute("opacity");
 			}
 
-			if (clonedNode.id === "Shadow") {
+			if (style.fillRule && style.fillRule !== "nonzero") {
 				clonedNode.setAttribute("fill", normalizeUrlReference(style.fill));
+			} else {
+				clonedNode.removeAttribute("fill");
 			}
 
 			const matrix = parseCssMatrix(style.transform);
 
-			if (!matrix) {
+			if (!matrix || (matrix[0] === 1 && matrix[1] === 0 && matrix[2] === 0 && matrix[3] === 1 && matrix[4] === 0 && matrix[5] === 0)) {
 				return;
 			}
 
@@ -1493,7 +1514,7 @@
 		resetAll();
 	</script>
 
-	
+
 </body>
 
 </html>
