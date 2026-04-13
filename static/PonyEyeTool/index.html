@@ -705,6 +705,7 @@
 					to sync X and Y together.
 				</p>
 				<button id="export-svg" type="button">Export SVG</button>
+				<button id="export-png" type="button">Export PNG</button>
 				<button id="reset-controls" type="button">Reset</button>
 			</div>
 		</div>
@@ -945,7 +946,8 @@
 		const svg = document.querySelector("svg");
 		const sliderGroupsHost = document.getElementById("slider-groups");
 		const resetButton = document.getElementById("reset-controls");
-		const exportButton = document.getElementById("export-svg");
+		const exportSVGButton = document.getElementById("export-svg");
+		const exportPNGButton = document.getElementById("export-png");
 
 		const groups = [
 			{ key: "lower-brow", label: "Lower brow" },
@@ -1421,8 +1423,7 @@
 			);
 		}
 
-		function downloadTextFile(filename, text, type) {
-			const blob = new Blob([text], { type });
+		function downloadFile(filename, blob) {
 			const url = URL.createObjectURL(blob);
 			const link = document.createElement("a");
 
@@ -1435,7 +1436,7 @@
 			URL.revokeObjectURL(url);
 		}
 
-		function exportSvg() {
+		function getSvgText() {
 			const clone = svg.cloneNode(true);
 
 			clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
@@ -1455,7 +1456,28 @@
 				serialized,
 			].join("\n");
 
-			downloadTextFile("pony-eyes.svg", svgText, "image/svg+xml");
+			return svgText;
+		}
+
+		function exportSvg() {
+			const svgText = getSvgText();
+			const blob = new Blob([svgText], { type: "image/svg+xml" });
+			downloadFile("pony-eyes.svg", blob);
+		}
+
+		function exportPng() {
+			const svgText = getSvgText();
+			const cvs = new OffscreenCanvas(svg.width.baseVal.value, svg.height.baseVal.value);
+			const ctx = cvs.getContext("2d");
+			const img = new Image();
+
+			img.onload = () => {
+				URL.revokeObjectURL(img.src);
+				ctx.drawImage(img, 0, 0);
+				cvs.convertToBlob({ type: "image/png" }).then(b => downloadFile("pony-eyes.png", b));
+			};
+			const svgBlob = new Blob([svgText], { type: "image/svg+xml" });
+			img.src = URL.createObjectURL(svgBlob);
 		}
 
 		window.addEventListener("keydown", (event) => {
@@ -1508,7 +1530,8 @@
 		}
 
 		resetButton.addEventListener("click", resetAll);
-		exportButton.addEventListener("click", exportSvg);
+		exportSVGButton.addEventListener("click", exportSvg);
+		exportPNGButton.addEventListener("click", exportPng);
 
 		buildSliders();
 		resetAll();
