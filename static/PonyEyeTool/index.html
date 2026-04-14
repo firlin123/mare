@@ -1131,6 +1131,7 @@
 			for (const group of groups) {
 				const card = document.createElement("section");
 				card.className = "slider-group";
+				card.dataset.group = group.key;
 
 				const head = document.createElement("div");
 				head.className = "slider-group-head";
@@ -1204,6 +1205,30 @@
 			}
 		}
 
+		function setGroupHidden(groupKey, hidden) {
+			const card = sliderGroupsHost.querySelector(
+				`.slider-group[data-group="${groupKey}"]`,
+			);
+
+			if (!card) {
+				return;
+			}
+
+			card.hidden = hidden;
+		}
+
+		function updateVisibleControls() {
+			const hideUpperBrow =
+				document.getElementById("hide-upper-brow").checked;
+			const hideLowerBrow =
+				document.getElementById("hide-lower-brow").checked;
+			const hideCheek = document.getElementById("hide-cheek").checked;
+
+			setGroupHidden("upper-brow", hideUpperBrow);
+			setGroupHidden("lower-brow", hideLowerBrow);
+			setGroupHidden("cheek", hideCheek);
+		}
+
 		function applyCheckboxes() {
 			svg.classList.toggle(
 				"no-upper-brow",
@@ -1219,6 +1244,8 @@
 				"no-cheek",
 				document.getElementById("hide-cheek").checked,
 			);
+
+			updateVisibleControls();
 		}
 
 		function applyEyeStyle() {
@@ -1227,6 +1254,8 @@
 			).value;
 
 			svg.classList.toggle("batpony-eyes", value === "batpony");
+
+			updateVisibleControls();
 		}
 
 		function applyExpression() {
@@ -1241,6 +1270,8 @@
 			} else if (value === "frown") {
 				svg.classList.add("frown");
 			}
+
+			updateVisibleControls();
 		}
 
 		function applyShadowMode() {
@@ -1255,6 +1286,8 @@
 			} else if (value === "none") {
 				svg.classList.add("no-shadow");
 			}
+
+			updateVisibleControls();
 		}
 
 		function resetAll() {
@@ -1536,6 +1569,7 @@
 
 		buildSliders();
 		resetAll();
+		updateVisibleControls();
 	</script>
 
 
