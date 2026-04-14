@@ -472,8 +472,8 @@
 			g#Right\ eye g#Normal\ eyes,
 			g#Right\ eye g#Bap\ eyes {
 				transform: translate(var(--eye-inner-x),
-						var(--eye-inner-y)) rotate(var(--eye-inner-rotate)) scale(var(--eye-inner-scale-x),
-						var(--eye-inner-scale-y));
+						var(--eye-inner-y)) rotate(var(--eye-inner-rotate)) scale(calc(var(--eye-inner-scale-x) / var(--eye-scale-x)),
+						calc(var(--eye-inner-scale-y) / var(--eye-scale-y)));
 			}
 
 			g#Left\ eye g#Normal\ eyes {
@@ -487,8 +487,9 @@
 			g#Left\ eye g#Normal\ eyes,
 			g#Left\ eye g#Bap\ eyes {
 				transform: translate(calc(-1 * var(--eye-inner-x)),
-						var(--eye-inner-y)) rotate(calc(-1 * var(--eye-inner-rotate))) scale(var(--eye-inner-scale-x),
-						var(--eye-inner-scale-y));
+						var(--eye-inner-y)) rotate(calc(-1 * var(--eye-inner-rotate))) scale(calc(var(--eye-inner-scale-x) / var(--eye-scale-x)),
+						calc(var(--eye-inner-scale-y) / var(--eye-scale-y)));
+
 			}
 
 			/* Just the pupil */
