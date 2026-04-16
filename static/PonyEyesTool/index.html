@@ -622,6 +622,10 @@
 			svg.smile path#Outline\ 4\ slight\ smile {
 				display: none !important;
 			}
+
+			svg.no-bg path#BG {
+				display: none;
+			}
 		</style>
 		<div class="tool-ui">
 			<div class="tool-top">
@@ -641,6 +645,11 @@
 					<label>
 						<input id="hide-cheek" type="checkbox" checked>
 						Hide cheek
+					</label>
+
+					<label>
+						<input id="no-bg" type="checkbox" checked>
+						No background
 					</label>
 				</fieldset>
 
@@ -706,6 +715,7 @@
 					to sync X and Y together.
 				</p>
 				<button id="export-svg" type="button">Export SVG</button>
+				<button id="export-flat-svg" type="button">Export flat SVG</button>
 				<button id="export-png" type="button">Export PNG</button>
 				<button id="reset-controls" type="button">Reset</button>
 			</div>
@@ -942,12 +952,185 @@
 			}
 		}
 	</style>
+	<script src="https://unpkg.com/paper@0.12.18/dist/paper-full.min.js"></script>
+	<script>
+		var declip = (() => {
+			if (typeof paper === "undefined") {
+				console.error("Paper.js is required for declip to work.");
+				/** @type {(svgString: string) => string} */
+				return (svgString) => svgString;
+			}
+			const scope = new paper.PaperScope();
+			const canvas = document.createElement("canvas");
+			scope.setup(canvas);
+
+			function isShape(item) {
+				return (
+					item instanceof paper.Path ||
+					item instanceof paper.CompoundPath
+				);
+			}
+
+			function collectShapes(item, out = []) {
+				if (!item.children) return out;
+
+				for (const child of item.children) {
+					if (child.clipMask) continue;
+
+					if (isShape(child)) {
+						out.push(child);
+					} else if (child instanceof paper.Group) {
+						collectShapes(child, out);
+					}
+				}
+
+				return out;
+			}
+
+			function normalizeShapeForBoolean(item) {
+				const clone = item.clone({ insert: false });
+				clone.clipMask = false;
+
+				if (clone instanceof paper.Path) {
+					if (!clone.closed) clone.closed = true;
+					clone.reduce();
+				} else if (clone instanceof paper.CompoundPath) {
+					for (const child of clone.children) {
+						if (child instanceof paper.Path) {
+							if (!child.closed) child.closed = true;
+							child.reduce();
+						}
+					}
+				}
+
+				return clone;
+			}
+
+			function safeIntersect(target, clip) {
+				const a = normalizeShapeForBoolean(target);
+				const b = normalizeShapeForBoolean(clip);
+
+				let result = null;
+
+				try {
+					result = a.intersect(b);
+				} catch (err) {
+					console.warn("Intersect failed:", err, {
+						target,
+						clip,
+					});
+				}
+
+				a.remove();
+				b.remove();
+
+				if (!result || result.isEmpty()) {
+					if (result) result.remove();
+					return null;
+				}
+
+				// If Paper inserted it automatically, detach it so we can place it manually.
+				result.remove();
+				result.copyAttributes(target);
+
+				return result;
+			}
+
+			function bakeClipGroup(group) {
+				const clip = group.children.find((c) => c.clipMask);
+				if (!clip || !group.parent) return false;
+
+				const parent = group.parent;
+				const insertIndex = group.index;
+				const targets = collectShapes(group);
+				const baked = [];
+
+				console.log("Baking clip group:", group, "targets:", targets.length);
+
+				for (const target of targets) {
+					const result = safeIntersect(target, clip);
+					if (result) {
+						baked.push(result);
+					}
+				}
+
+				if (baked.length === 0) {
+					console.warn("No baked results for group, leaving original untouched.");
+					return false;
+				}
+
+				for (let i = 0; i < baked.length; i++) {
+					parent.insertChild(insertIndex + i, baked[i]);
+				}
+
+				group.remove();
+				return true;
+			}
+
+			function bakeNestedClipGroups(item) {
+				if (!item || !item.children) return;
+
+				for (const child of [...item.children]) {
+					bakeNestedClipGroups(child);
+				}
+
+				if (
+					item instanceof paper.Group &&
+					item.children.some((c) => c.clipMask)
+				) {
+					bakeClipGroup(item);
+				}
+			}
+
+			/** 
+			 * Takes an SVG string, declips it by baking all clip groups, and returns the resulting SVG string.
+			 * 
+			 * @param {string} svgString - The input SVG string to declip.
+			 * @return {string} - The declipped SVG string.
+			 */
+			function declip(svgString) {
+				scope.project.clear();
+
+				const orignalSvg = new DOMParser().parseFromString(svgString, "image/svg+xml").documentElement;
+				const originalViewBox = orignalSvg.getAttribute("viewBox");
+				const originalWidth = orignalSvg.getAttribute("width");
+				const originalHeight = orignalSvg.getAttribute("height");
+				orignalSvg.setAttribute("overflow", "visible");
+
+				const item = scope.project.importSVG(orignalSvg, {
+					expandShapes: true,
+				});
+
+				bakeNestedClipGroups(item);
+
+				const svg = scope.project.exportSVG({
+					asString: false,
+					precision: 3,
+				});
+
+				if (originalViewBox) {
+					svg.setAttribute("viewBox", originalViewBox);
+				}
+				if (originalWidth) {
+					svg.setAttribute("width", originalWidth);
+				}
+				if (originalHeight) {
+					svg.setAttribute("height", originalHeight);
+				}
+
+				return svg.outerHTML;
+			}
+
+			return declip;
+		})();
+	</script>
 	<script>
 		const root = document.documentElement;
 		const svg = document.querySelector("svg");
 		const sliderGroupsHost = document.getElementById("slider-groups");
 		const resetButton = document.getElementById("reset-controls");
 		const exportSVGButton = document.getElementById("export-svg");
+		const exportFlatSVGButton = document.getElementById("export-flat-svg");
 		const exportPNGButton = document.getElementById("export-png");
 
 		const groups = [
@@ -1245,6 +1428,11 @@
 				document.getElementById("hide-cheek").checked,
 			);
 
+			svg.classList.toggle(
+				"no-bg",
+				document.getElementById("no-bg").checked,
+			);
+
 			updateVisibleControls();
 		}
 
@@ -1303,6 +1491,7 @@
 			document.getElementById("hide-upper-brow").checked = false;
 			document.getElementById("hide-lower-brow").checked = false;
 			document.getElementById("hide-cheek").checked = true;
+			document.getElementById("no-bg").checked = false;
 
 			document.querySelector(
 				'input[name="eye-style"][value="normal"]',
@@ -1493,10 +1682,43 @@
 			return svgText;
 		}
 
+		function unV(svgText) {
+			const svg = new DOMParser().parseFromString(svgText, "image/svg+xml").documentElement;
+
+			const children = Array.from(svg.querySelectorAll("g#V>*"));
+			const toRemove = [];
+
+			for (const child of svg.children) {
+				if (child instanceof SVGGElement) {
+					toRemove.push(child);
+				}
+			}
+
+			for (const child of toRemove) {
+				child.remove();
+			}
+
+			for (const child of children) {
+				svg.appendChild(child);
+			}
+
+			const serialized = new XMLSerializer().serializeToString(svg);
+			return [
+				'<?xml version="1.0" encoding="UTF-8"?>',
+				serialized,
+			].join("\n");
+		}
+
 		function exportSvg() {
-			const svgText = getSvgText();
+			const svgText = unV(getSvgText());
 			const blob = new Blob([svgText], { type: "image/svg+xml" });
 			downloadFile("pony-eyes.svg", blob);
+		}
+
+		function exportFlatSvg() {
+			const svgText = unV(declip(getSvgText()));
+			const blob = new Blob([svgText], { type: "image/svg+xml" });
+			downloadFile("pony-eyes-flat.svg", blob);
 		}
 
 		function exportPng() {
@@ -1551,6 +1773,10 @@
 			.getElementById("hide-cheek")
 			.addEventListener("change", applyCheckboxes);
 
+		document
+			.getElementById("no-bg")
+			.addEventListener("change", applyCheckboxes);
+
 		for (const radio of document.querySelectorAll('input[name="eye-style"]')) {
 			radio.addEventListener("change", applyEyeStyle);
 		}
@@ -1565,6 +1791,7 @@
 
 		resetButton.addEventListener("click", resetAll);
 		exportSVGButton.addEventListener("click", exportSvg);
+		exportFlatSVGButton.addEventListener("click", exportFlatSvg);
 		exportPNGButton.addEventListener("click", exportPng);
 
 		buildSliders();
