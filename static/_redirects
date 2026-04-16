@@ -1,1 +1,3 @@
-/PonyEyeTool /PonyEyesTool 301
+/PonyEyeTool /PonyEyesTool/ 301
+/PonyEyeTool/* /PonyEyesTool/ 301
+/PonyEyesTool /PonyEyesTool/ 301
